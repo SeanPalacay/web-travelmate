@@ -36,61 +36,61 @@ class ReviewController extends Controller
      }
     
      public function ownerindex(Request $request)
-    {
-        $userId = $request->user()->id;
-    
-        $reviews = Review::whereHas('destination', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->whereIn('status', ['pending', 'approved', 'declined'])->paginate(50);
-    
-        // Convert createdAt to Asia/Manila timezone for each review and change the format
-        foreach ($reviews as $review) {
-            if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
-                // Convert MongoDB\BSON\UTCDateTime to Carbon instance
-                $dateTime = $review->createdAt->toDateTime();
-                
-                $review->formatted_created_at = Carbon::parse($dateTime)
-                    ->setTimezone('Asia/Manila')
-                    ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
-            }
+{
+    $userId = $request->user()->id;
+
+    $reviews = Review::whereHas('destination', function ($query) use ($userId) {
+        $query->where('user_id', $userId);
+    })->whereIn('status', ['pending', 'approved', 'declined'])->paginate(50);
+
+    // Convert createdAt to Asia/Manila timezone for each review and change the format
+    foreach ($reviews as $review) {
+        if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
+            // Convert MongoDB\BSON\UTCDateTime to Carbon instance
+            $dateTime = $review->createdAt->toDateTime();
+            
+            $review->formatted_created_at = Carbon::parse($dateTime)
+                ->setTimezone('Asia/Manila')
+                ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
         }
-    
-        return view('owner/reviews', ['title' => 'Reviews', 'reviews' => $reviews]);
     }
+
+    return view('owner/reviews', ['title' => 'Reviews', 'reviews' => $reviews]);
+}
     
     
     
 
-    public function adminindex(Request $request)
-    {
-        // Get the locality of the logged-in admin
-        $adminLocality = $request->user()->locality;
-        $userId = $request->user()->id;
-    
-        // Fetch reviews where the related destination belongs to the admin's locality and the destination's user_id matches
-        $reviews = Review::whereHas('destination', function ($query) use ($userId, $adminLocality) {
-            $query->where('user_id', $userId)
-                  ->where('locality', $adminLocality); // Ensure locality matches the admin's locality
-        })->where('status', '!=', 'declined')->paginate(50);
-    
-        // Convert createdAt to Asia/Manila timezone for each review and change the format
-        foreach ($reviews as $review) {
-            if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
-                // Convert MongoDB\BSON\UTCDateTime to Carbon instance
-                $dateTime = $review->createdAt->toDateTime();
-    
-                $review->formatted_created_at = Carbon::parse($dateTime)
-                    ->setTimezone('Asia/Manila')
-                    ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
-            }
+public function adminindex(Request $request)
+{
+    // Get the locality of the logged-in admin
+    $adminLocality = $request->user()->locality;
+    $userId = $request->user()->id;
+
+    // Fetch reviews where the related destination belongs to the admin's locality and the destination's user_id matches
+    $reviews = Review::whereHas('destination', function ($query) use ($userId, $adminLocality) {
+        $query->where('user_id', $userId)
+              ->where('locality', $adminLocality); // Ensure locality matches the admin's locality
+    })->where('status', '!=', 'declined')->paginate(50);
+
+    // Convert createdAt to Asia/Manila timezone for each review and change the format
+    foreach ($reviews as $review) {
+        if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
+            // Convert MongoDB\BSON\UTCDateTime to Carbon instance
+            $dateTime = $review->createdAt->toDateTime();
+
+            $review->formatted_created_at = Carbon::parse($dateTime)
+                ->setTimezone('Asia/Manila')
+                ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
         }
-    
-        // Return the view with the filtered reviews
-        return view('admin/reviews', [
-            'title' => 'Reviews',
-            'reviews' => $reviews
-        ]);
     }
+
+    // Return the view with the filtered reviews
+    return view('admin/reviews', [
+        'title' => 'Reviews',
+        'reviews' => $reviews
+    ]);
+}
     
     
     
