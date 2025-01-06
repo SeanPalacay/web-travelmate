@@ -19,19 +19,19 @@ class ReviewController extends Controller
      public function uploadProof(Request $request)
      {
          $request->validate([
-             'proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate the image
+             'proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
          ]);
-     
+ 
          if ($request->hasFile('proof')) {
              $file = $request->file('proof');
-             $fileName = time() . '_' . $file->getClientOriginalName(); // Generate a unique filename
+             $fileName = time() . '_' . $file->getClientOriginalName();
              $filePath = $file->storeAs('proofs', $fileName, 'public'); // Save to public/storage/proofs
-     
+ 
              return response()->json([
-                 'url' => Storage::url($filePath), // Return the public URL of the image
+                 'url' => Storage::url($filePath), // Return the public URL
              ]);
          }
-     
+ 
          return response()->json(['error' => 'No file uploaded'], 400);
      }
     
