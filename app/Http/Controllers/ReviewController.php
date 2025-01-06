@@ -8,13 +8,34 @@ use Illuminate\Http\Request;
 use App\Models\Destination;
 use Illuminate\Support\Facades\Log; // Import Log for logging
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ReviewController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function ownerindex(Request $request)
+    
+     public function uploadProof(Request $request)
+     {
+         $request->validate([
+             'proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate the image
+         ]);
+     
+         if ($request->hasFile('proof')) {
+             $file = $request->file('proof');
+             $fileName = time() . '_' . $file->getClientOriginalName(); // Generate a unique filename
+             $filePath = $file->storeAs('proofs', $fileName, 'public'); // Save to public/storage/proofs
+     
+             return response()->json([
+                 'url' => Storage::url($filePath), // Return the public URL of the image
+             ]);
+         }
+     
+         return response()->json(['error' => 'No file uploaded'], 400);
+     }
+    
+     public function ownerindex(Request $request)
     {
         $userId = $request->user()->id;
     
@@ -79,23 +100,33 @@ class ReviewController extends Controller
      * Store a newly created resource in storage.
      */
         
-    public function store(Request $request)
-    {
-        $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'review_title' => 'required|string|max:255',
-            'comment' => 'required|string',
-            'date' => 'required|date',
-            'proof' => 'required|string',
-            'destination_id' => 'required|exists:destinations,_id',
-            'user_id' => 'required|exists:client_users,_id',
-            'status' => 'required|string|in:pending,approved,rejected',
-        ]);
-
-        Review::create($request->all());
-
-        return redirect()->route('reviews.index')->with('success', 'Review created successfully.');
-    }
+     public function store(Request $request)
+     {
+         $request->validate([
+             'rating' => 'required|integer|min:1|max:5',
+             'review_title' => 'required|string|max:255',
+             'comment' => 'required|string',
+             'date' => 'required|date',
+             'proof' => 'required|string', // URL of the uploaded proof image
+             'destination_id' => 'required|exists:destinations,_id',
+             'user_id' => 'required|exists:client_users,_id',
+             'status' => 'required|string|in:pending,approved,rejected',
+         ]);
+     
+         // Create the review with the proof URL
+         Review::create([
+             'rating' => $request->rating,
+             'review_title' => $request->review_title,
+             'comment' => $request->comment,
+             'date' => $request->date,
+             'proof' => $request->proof, // Store the proof image URL
+             'destination_id' => $request->destination_id,
+             'user_id' => $request->user_id,
+             'status' => $request->status,
+         ]);
+     
+         return redirect()->route('reviews.index')->with('success', 'Review created successfully.');
+     }
 
     /**
      * Display the specified resource.

@@ -15,6 +15,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
+Route::post('/upload-proof', [ReviewController::class, 'uploadProof'])->name('upload.proof');
+
 Route::get('/images/{folder}/{filename}', function ($folder, $filename) {
     $path = storage_path("app/public/$folder/$filename");
     

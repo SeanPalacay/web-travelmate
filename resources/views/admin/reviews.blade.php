@@ -185,10 +185,16 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <img class="img-fluid rounded mb-4 shadow-sm" src="{{ asset('images/proofs/' . $review->proof) }}" alt="Proof">
-                                                <p class="text-muted mt-3">{{ $review->comment }}</p>
+                                                @if($review->proof)
+                                                <img class="img-fluid rounded mb-4 shadow-sm" 
+                                                     src="{{ $review->proof }}" 
+                                                     alt="Proof"
+                                                     onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
+                                              @else
+                                                <p class="text-muted">No proof image available</p>
+                                              @endif
+                                                <p class="text-muted mt-3">{{ $review->comment ?? 'No comment available' }}</p>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
