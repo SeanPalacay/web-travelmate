@@ -19,7 +19,7 @@
         }
 
         .table th, .table td {
-            text-align: center; /* Center align table header and table data */
+            text-align: center; /* Center the table headers and cells */
             padding: 12px;
             vertical-align: middle;
         }
@@ -30,10 +30,6 @@
             text-transform: uppercase;
             font-size: 0.875rem;
             font-weight: 600;
-        }
-
-        .table td {
-            color: #000000; /* Keep the review values black */
         }
 
         .table-hover tbody tr:hover {
@@ -154,14 +150,10 @@
             }
         }
 
-        /* Add margin-top to the reviews section */
-        .reviews-section {
-            margin-top: 30px;
-        }
-
-        /* Make the "Reviews" heading the same color as the table header */
-        .reviews-section h1 {
-            color: #0D6EFD;
+        /* Reviews text styling */
+        h1 {
+            color: #0D6EFD; /* Make "Reviews" text this color */
+            margin-top: 20px; /* Add some margin on top of the "Reviews" text */
         }
     </style>
 </head>
@@ -169,7 +161,7 @@
     <div class="wrapper">
         @include('owner/partials/aside')
         <div class="main p-3">
-            <div class="text-center reviews-section">
+            <div class="text-center">
                 <h1>Reviews</h1>
             </div>
             <div class="row justify-content-center mt-5">
@@ -191,15 +183,18 @@
                         </div>
                     @endif
 
-                    <!-- Filter Dropdown for Review Status -->
+                    <!-- Filter Dropdown for Review Ratings -->
                     <x-filter 
                         :options="[ 
-                            ['value' => 'pending', 'label' => 'Pending'],
-                            ['value' => 'declined', 'label' => 'Declined']
+                            ['value' => '1', 'label' => '1'],
+                            ['value' => '2', 'label' => '2'],
+                            ['value' => '3', 'label' => '3'],
+                            ['value' => '4', 'label' => '4'],
+                            ['value' => '5', 'label' => '5']
                         ]"
                         rowSelector="#reviewsTable tr"
-                        columnIndex="7"
-                        defaultLabel="All Status"
+                        columnIndex="5"
+                        defaultLabel="Rating"
                     />
 
                     <div class="table-responsive">
@@ -213,8 +208,7 @@
                                     <th>Reviewer</th>
                                     <th>Ratings</th>
                                     <th>Date Created</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="reviewsTable">
@@ -227,17 +221,21 @@
                                     <td data-label="Reviewer">{{ $review->user->firstname }} {{ $review->user->lastname }}</td>
                                     <td data-label="Ratings">{{ $review->rating }}</td>
                                     <td data-label="Date Created">{{ $review->formatted_created_at }}</td>
-                                    <td data-label="Status">{{ ucfirst($review->status) }}</td>
                                     <td data-label="Action">
                                         <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
                                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                            <!-- Unique Modal for Proof -->
                                             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
-                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal{{ $review->_id }}">Report</a>
+                                            <form action="/owner/reviews/delete/{{ $review->id }}" method="POST" class="w-100" style="display: inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item">Delete</button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
 
-                                <!-- Proof & Comment Modal -->
+                                <!-- Modal for Proof & Comment (Unique per Review) -->
                                 <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content border-0 shadow-lg">
@@ -246,68 +244,23 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <img class="img-fluid rounded mb-4 shadow-sm" src="{{ asset('images/proofs/' . $review->proof) }}" alt="Proof">
-                                                <p class="text-muted mt-3">{{ $review->comment }}</p>
+                                                @if($review->proof)
+                                                <img class="img-fluid rounded mb-4 shadow-sm" 
+                                                     src="https://travelmate-be.onrender.com/{{ $review->proof }}" 
+                                                     alt="Proof"
+                                                     onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
+                                                @else
+                                                <p class="text-muted">No proof image available</p>
+                                                @endif
+                                                <p class="text-muted mt-3">{{ $review->comment ?? 'No comment available' }}</p>
                                             </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary w-100 fw-bold" data-bs-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Report Modal -->
-                                <div class="modal fade" id="reportModal{{ $review->_id }}" tabindex="-1" aria-labelledby="reportLabel{{ $review->_id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow-lg">
-                                            <div class="modal-header bg-light">
-                                                <h1 class="modal-title fs-4 fw-bold text-dark" id="reportLabel{{ $review->_id }}">Report Review</h1>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form action="/owner/reports/store" method="POST">
-                                                @csrf
-                                                <div class="modal-body">
-                                                    @if ($errors->any())
-                                                        <div class="alert alert-danger">
-                                                            <ul class="mb-0">
-                                                                @foreach ($errors->all() as $error)
-                                                                    <li>{{ $error }}</li>
-                                                                @endforeach
-                                                            </ul>
-                                                        </div>
-                                                    @endif
-
-                                                    <!-- Hidden Fields -->
-                                                    <input type="hidden" value="{{ $review->id }}" name="review_id" id="review_id">
-                                                    <input type="hidden" value="{{ $review->destination_id }}" name="destination_id" id="destination_id">
-
-                                                    <!-- Report Reason Options -->
-                                                    @php
-                                                    $reportOptions = [
-                                                        ['name' => 'report_reason', 'value' => 'False information', 'label' => 'False information'],
-                                                        ['name' => 'report_reason', 'value' => 'Offensive language', 'label' => 'Offensive language'],
-                                                        ['name' => 'report_reason', 'value' => 'Spam', 'label' => 'Spam'],
-                                                        ['name' => 'report_reason', 'value' => 'Conflict of interest', 'label' => 'Conflict of interest'],
-                                                        ['name' => 'report_reason', 'value' => 'Privacy violation', 'label' => 'Privacy violation'],
-                                                        ['name' => 'report_reason', 'value' => 'Irrelevant content', 'label' => 'Irrelevant content'],
-                                                        ['name' => 'report_reason', 'value' => 'Threats', 'label' => 'Threats']
-                                                    ];
-                                                    @endphp
-
-                                                    <x-input-radio :options="$reportOptions" name="reason" class="mb-3" />
-                                                    <x-textarea-field label="Others" name="others" id="others" class="mt-3" />
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button class="btn btn-primary w-100 fw-bold" type="submit">Submit Report</button>
-                                                </div>
-                                            </form>
                                         </div>
                                     </div>
                                 </div>
 
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="text-center">No data yet</td>
+                                    <td colspan="8" class="text-center">No data yet</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -364,10 +317,10 @@
                     const filterValue = this.value;
                     
                     rows.forEach(row => {
-                        const statusCell = row.children[7];
-                        if (statusCell) {
-                            const statusText = statusCell.textContent.trim().toLowerCase();
-                            if (filterValue === '' || statusText === filterValue.toLowerCase()) {
+                        const ratingCell = row.children[5];
+                        if (ratingCell) {
+                            const ratingText = ratingCell.textContent.trim();
+                            if (filterValue === '' || ratingText === filterValue) {
                                 row.style.display = '';
                             } else {
                                 row.style.display = 'none';
