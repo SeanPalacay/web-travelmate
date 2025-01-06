@@ -1,0 +1,31 @@
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transition: width 0.3s;
+}
+
+.main {
+    margin-left: 260px;
+    transition: margin-left 0.3s;
+}
+
+@media (max-width: 768px) {
+    #sidebar:not(.expand) {
+        width: 0;
+    }
+    .main {
+        margin-left: 0;
+    }
+}
+
+.sidebar-dropdown {
+    transition: all 0.3s;
+}
+
+.sidebar-item-wrapper:hover {
+    transform: translateX(5px);
+    transition: transform 0.3s;
+}
