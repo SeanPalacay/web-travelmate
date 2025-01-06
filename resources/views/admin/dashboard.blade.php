@@ -1,178 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }}</title>
-    <link rel="icon" href="{{ asset('assets/Travel.png') }}" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('styles.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* General Styles */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{{ $title }}</title>
+   <link rel="icon" href="{{ asset('assets/Travel.png') }}" type="image/x-icon">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+   <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+   @vite(['resources/css/app.css'])
 
-        .dashboard-title {
-            font-family: 'Poppins', sans-serif;
-            color: #0D6EFD;
-            margin-top: 3rem;
-            font-size: 2.5rem;
-            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-        }
+   <style>
+       :root {
+           --primary-blue: #0040ff;
+           --sidebar-width: 260px;
+       }
 
-        .card {
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border-radius: 20px;
-            border: none;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background-color: #fff;
-            animation: fadeInCard 0.6s ease forwards;
-        }
+       body {
+           font-family: 'Poppins', sans-serif;
+           background-color: #f8fafc;
+           min-height: 100vh;
+       }
 
-        .card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-        }
+       .wrapper {
+           display: flex;
+           min-height: 100vh;
+       }
 
-        .card-body {
-            padding: 1.8rem; /* Adjusted padding */
-            text-align: center;
-        }
+       #sidebar {
+           position: fixed;
+           width: var(--sidebar-width);
+           height: 100vh;
+           background: linear-gradient(180deg, #0b0e1f, var(--primary-blue));
+           color: white;
+           z-index: 1000;
+           transition: transform 0.3s ease;
+       }
 
-        .stat-title {
-            font-size: 1.4rem;
-            color: #6c757d;
-            font-weight: 600;
-        }
+       .main {
+           flex: 1;
+           margin-left: var(--sidebar-width);
+           padding: 2rem;
+       }
 
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #0D6EFD;
-            margin-top: 15px;
-        }
+       .welcome-banner {
+           background: var(--primary-blue);
+           color: white;
+           padding: 1.5rem 2rem;
+           border-radius: 1rem;
+           margin-bottom: 2.5rem;
+           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+       }
 
-        /* Animation Effects */
-        @keyframes fadeInCard {
-            0% {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+       .stats-grid {
+           display: grid;
+           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+           gap: 1.5rem;
+           padding: 1rem;
+       }
 
-        /* Button Customization */
-        .btn-primary {
-            background-color: #0D6EFD;
-            border-color: #0D6EFD;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
+       .stat-card {
+           background: white;
+           border-radius: 1rem;
+           padding: 1.5rem;
+           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+           transition: transform 0.2s ease, box-shadow 0.2s ease;
+       }
 
-        .btn-primary:hover {
-            background-color: #084298;
-            box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
-        }
+       .stat-card:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+       }
 
-        /* Adjust card spacing */
-        .row .col-sm-12 {
-            margin-bottom: 15px; /* Reduce the space between rows */
-        }
+       .stat-title {
+           font-size: 1.1rem;
+           color: #64748b;
+           font-weight: 500;
+           margin-bottom: 0.75rem;
+       }
 
-        /* Adjust card width to be more square-like */
-        .col-lg-3 {
-            max-width: 280px; /* Set a bigger max-width for larger squares */
-            margin-left: 10px;
-            margin-right: 10px;
-        }
+       .stat-value {
+           font-size: 2.25rem;
+           font-weight: 700;
+           color: var(--primary-blue);
+       }
 
-        /* Remove space between columns for tighter tile-like display */
-        .row {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-    </style>
+       @media (max-width: 768px) {
+           #sidebar {
+               transform: translateX(-100%);
+           }
+
+           #sidebar.active {
+               transform: translateX(0);
+           }
+
+           .main {
+               margin-left: 0;
+               width: 100%;
+           }
+
+           .stats-grid {
+               grid-template-columns: 1fr;
+           }
+       }
+   </style>
 </head>
 <body>
-    <div class="wrapper">
-        @include('admin/partials/aside')
-        <div class="main p-3">
-            <div class="text-center">
-                <h1 class="dashboard-title">
-                    Hello! {{ $user->firstname }} {{ $user->lastname }}
-                </h1>
-            </div>
+   <div class="wrapper">
+       @include('admin/partials/aside')
+       
+       <div class="main">
+           <div class="welcome-banner">
+               <h1 class="m-0" style="font-size: 1.75rem; font-weight: 600;">
+                   Welcome back, {{ $user->firstname }} {{ $user->lastname }}! 👋
+               </h1>
+           </div>
 
-            <!-- First Row with 3 Cards -->
-            <div class="row justify-content-center mt-5">
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="stat-title">Reviews</span>
-                            <div class="stat-value">{{ $reviewCount }}</div>
-                        </div>
-                    </div>
-                </div>
+           <div class="stats-grid">
+               <div class="stat-card">
+                   <div class="stat-title">Reviews</div>
+                   <div class="stat-value">{{ $reviewCount }}</div>
+               </div>
 
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="stat-title">Reports</span>
-                            <div class="stat-value">{{ $reportCount }}</div>
-                        </div>
-                    </div>
-                </div>
+               <div class="stat-card">
+                   <div class="stat-title">Reports</div>
+                   <div class="stat-value">{{ $reportCount }}</div>
+               </div>
 
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="stat-title">Fare</span>
-                            <div class="stat-value">{{ $fareCount }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+               <div class="stat-card">
+                   <div class="stat-title">Fare</div>
+                   <div class="stat-value">{{ $fareCount }}</div>
+               </div>
 
-            <!-- Second Row with 3 Cards -->
-            <div class="row justify-content-center mt-5">
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="stat-title">Destinations</span>
-                            <div class="stat-value">{{ $destinationCount }}</div>
-                        </div>
-                    </div>
-                </div>
+               <div class="stat-card">
+                   <div class="stat-title">Destinations</div>
+                   <div class="stat-value">{{ $destinationCount }}</div>
+               </div>
 
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="stat-title">Pending Applications</span>
-                            <div class="stat-value">{{ $applicationCount }}</div>
-                        </div>
-                    </div>
-                </div>
+               <div class="stat-card">
+                   <div class="stat-title">Pending Applications</div>
+                   <div class="stat-value">{{ $applicationCount }}</div>
+               </div>
 
-                <div class="col-sm-12 col-md-6 col-lg-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <span class="stat-title">Rejected Applications</span>
-                            <div class="stat-value">{{ $declinedCount }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-    <script src="{{ asset('script.js') }}"></script>
+               <div class="stat-card">
+                   <div class="stat-title">Rejected Applications</div>
+                   <div class="stat-value">{{ $declinedCount }}</div>
+               </div>
+           </div>
+       </div>
+   </div>
+
+   <script>
+       // Mobile sidebar toggle
+       document.addEventListener('DOMContentLoaded', function() {
+           const toggleBtn = document.querySelector('.sidebar-toggle');
+           const sidebar = document.getElementById('sidebar');
+
+           if (toggleBtn) {
+               toggleBtn.addEventListener('click', () => {
+                   sidebar.classList.toggle('active');
+               });
+           }
+
+           // Close sidebar when clicking outside on mobile
+           document.addEventListener('click', (e) => {
+               if (window.innerWidth <= 768) {
+                   if (!sidebar.contains(e.target) && !toggleBtn?.contains(e.target)) {
+                       sidebar.classList.remove('active');
+                   }
+               }
+           });
+       });
+   </script>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
