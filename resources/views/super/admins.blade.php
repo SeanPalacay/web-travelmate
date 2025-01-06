@@ -95,6 +95,68 @@
             color: #0D6EFD; /* Make "Admins" text this color */
             margin-top: 20px; /* Add some margin on top of the "Admins" text */
         }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 0.875rem;
+        }
+
+        .pagination .page-item {
+            margin: 0 4px;
+            list-style: none;
+        }
+
+        .pagination .page-item .page-link {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: #0D6EFD;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0D6EFD;
+            color: #fff;
+            border-color: #0D6EFD;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #f8f9fa;
+            border-color: #ddd;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #f1f1f1;
+            color: #0D6EFD;
+        }
+
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            border-radius: 5px;
+        }
+
+        .pagination .page-item:first-child {
+            margin-right: 10px;
+        }
+
+        .pagination .page-item:last-child {
+            margin-left: 10px;
+        }
+
+        /* Pagination Info */
+        .pagination-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
     </style>
 </head>
 
@@ -126,7 +188,7 @@
 
                     <!-- Search Bar -->
                     <div class="row mb-3">
-                        <div class="col-md-6"> <!-- Set the search bar size to retain its width -->
+                        <div class="col-md-6">
                             <input type="text" id="searchInput" class="form-control" placeholder="Search...">
                         </div>
                     </div>
@@ -144,16 +206,15 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="faresTableBody">
+                            <tbody id="adminsTableBody">
                                 @forelse ($admins as $admin)
                                 <tr>
-                                    <td data-label="#"> {{ $loop->iteration }} </td>
+                                    <td data-label="#">{{ ($admins->currentPage() - 1) * $admins->perPage() + $loop->iteration }}</td>
                                     <td data-label="Name">{{ $admin->firstname }} {{ $admin->lastname }}</td>
                                     <td data-label="Locality">{{ $admin->locality }}</td>
                                     <td data-label="Email">{{ $admin->email }}</td>
                                     <td data-label="Mobile Number">{{ $admin->mobile_no }}</td>
                                     <td data-label="Date Created">{{ $admin->created_at->timezone('Asia/Manila')->format('F j, Y') }}</td>
-
                                     <td data-label="Actions">
                                         <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
                                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -168,11 +229,44 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="text-center">No data yet</td>
+                                    <td colspan="7" class="text-center">No data yet</td>
                                 </tr>
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <!-- Previous Button -->
+                                <li class="page-item {{ $admins->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $admins->previousPageUrl() }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Previous</span>
+                                    </a>
+                                </li>
+
+                                <!-- Page Numbers -->
+                                @for ($i = 1; $i <= $admins->lastPage(); $i++)
+                                    <li class="page-item {{ $admins->currentPage() == $i ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $admins->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+
+                                <!-- Next Button -->
+                                <li class="page-item {{ $admins->hasMorePages() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $admins->nextPageUrl() }}" aria-label="Next">
+                                        <span aria-hidden="true">Next &raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <!-- Pagination Info -->
+                    <div class="pagination-info">
+                        Showing {{ $admins->firstItem() }} to {{ $admins->lastItem() }} of {{ $admins->total() }} results
                     </div>
                 </div>
             </div>
@@ -185,7 +279,7 @@
         // Search functionality
         document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('searchInput');
-            const rows = document.querySelectorAll('#faresTableBody tr');
+            const rows = document.querySelectorAll('#adminsTableBody tr');
 
             if (searchInput) {
                 searchInput.addEventListener('keyup', function () {

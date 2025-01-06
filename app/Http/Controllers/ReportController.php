@@ -14,7 +14,8 @@ class ReportController extends Controller
      */
     public function index()
     {
-        //
+        $reports = Report::with('review')->paginate(10); // Fetch reports with 10 items per page
+        return view('reports.index', compact('reports'));
     }
 
     public function approve(string $id)

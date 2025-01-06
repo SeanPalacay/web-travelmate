@@ -87,7 +87,7 @@ Route::middleware('auth')->group(function () {
 
 
         Route::get('admins', function () {
-            $admins = User::where('type', 'admin')->paginate(50);
+            $admins = User::where('type', 'admin')->paginate(10);
         
             // Convert created_at to Asia/Manila timezone for each admin and change the format
             foreach ($admins as $admin) {
@@ -147,7 +147,7 @@ Route::middleware('auth')->group(function () {
         Route::get('applications', function () {
             $applications = Destination::whereIn('status', ['declined', 'pending'])
                 ->where('user_id', auth()->user()->id)
-                ->paginate(50);
+                ->paginate(10);
         
             return view('owner/my_applications', ['title' => 'My Applications', 'applications' => $applications]);
         });
@@ -155,7 +155,7 @@ Route::middleware('auth')->group(function () {
         Route::get('destinations', function () {
             $destinations = Destination::where('status', 'approved')
                 ->where('user_id', auth()->user()->id)
-                ->paginate(50);
+                ->paginate(10);
 
             return view('owner/destinations', ['title' => 'Destinations', 'destinations' => $destinations]);
         });
@@ -246,7 +246,7 @@ Route::middleware('auth')->group(function () {
             $applications = Destination::with('user')
                                         ->where('status', 'pending')
                                         ->where('locality', $adminLocality) // Filter by admin's locality
-                                        ->paginate(50);
+                                        ->paginate(10);
         
             // Return the view with the filtered applications
             return view('admin/applications', [
@@ -278,7 +278,7 @@ Route::middleware('auth')->group(function () {
             $adminLocality = auth()->user()->locality;
         
             // Fetch fares that belong to the admin's locality
-            $fares = Fare::where('designated_locality', $adminLocality)->paginate(50);
+            $fares = Fare::where('designated_locality', $adminLocality)->paginate(10);
         
             // Return the view with the filtered fares
             return view('admin/fares', [
@@ -315,7 +315,7 @@ Route::middleware('auth')->group(function () {
                             $query->where('locality', $adminLocality); // Filter by admin's locality
                         })
                         ->with(['review', 'review.destination'])
-                        ->paginate(50);
+                        ->paginate(10);
         
             // Convert created_at to Asia/Manila timezone for each report and change the format
             foreach ($reports as $report) {

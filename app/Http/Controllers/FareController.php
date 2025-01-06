@@ -12,7 +12,8 @@ class FareController extends Controller
      */
     public function index()
     {
-        //
+        $fares = Fare::paginate(10); // Fetch fares with 10 items per page
+        return view('fares.index', compact('fares'));
     }
 
     /**

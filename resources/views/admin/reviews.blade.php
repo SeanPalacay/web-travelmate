@@ -53,6 +53,68 @@
             color: #0b5ed7;
         }
 
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 0.875rem;
+        }
+
+        .pagination .page-item {
+            margin: 0 4px;
+            list-style: none;
+        }
+
+        .pagination .page-item .page-link {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: #0D6EFD;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0D6EFD;
+            color: #fff;
+            border-color: #0D6EFD;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #f8f9fa;
+            border-color: #ddd;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #f1f1f1;
+            color: #0D6EFD;
+        }
+
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            border-radius: 5px;
+        }
+
+        .pagination .page-item:first-child {
+            margin-right: 10px;
+        }
+
+        .pagination .page-item:last-child {
+            margin-left: 10px;
+        }
+
+        /* Pagination Info */
+        .pagination-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .table thead {
@@ -152,7 +214,7 @@
                             <tbody id="reviewsTable">
                                 @forelse ($reviews as $review)
                                 <tr>
-                                    <td data-label="#"> {{ $loop->iteration }} </td>
+                                    <td data-label="#">{{ ($reviews->currentPage() - 1) * $reviews->perPage() + $loop->iteration }}</td>
                                     <td data-label="Company Name">{{ $review->destination->company_name }}</td>
                                     <td data-label="Destination">{{ $review->destination->destination_name }}</td>
                                     <td data-label="Review Title">{{ $review->review_title }}</td>
@@ -165,17 +227,14 @@
                                             <!-- Unique Modal for Proof -->
                                             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
                                             <form action="/admin/reviews/delete/{{ $review->id }}" method="POST" class="w-100" style="display: inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="dropdown-item">Delete</button>
-                                                </form>
-
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item">Delete</button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
 
-
-                                            
                                 <!-- Modal for Proof & Comment (Unique per Review) -->
                                 <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
@@ -190,9 +249,9 @@
                                                      src="https://travelmate-be.onrender.com/{{ $review->proof }}" 
                                                      alt="Proof"
                                                      onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
-                                              @else
+                                                @else
                                                 <p class="text-muted">No proof image available</p>
-                                              @endif
+                                                @endif
                                                 <p class="text-muted mt-3">{{ $review->comment ?? 'No comment available' }}</p>
                                             </div>
                                         </div>
@@ -207,11 +266,46 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination Links -->
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <!-- Previous Button -->
+                                <li class="page-item {{ $reviews->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $reviews->previousPageUrl() }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Previous</span>
+                                    </a>
+                                </li>
+
+                                <!-- Page Numbers -->
+                                @for ($i = 1; $i <= $reviews->lastPage(); $i++)
+                                    <li class="page-item {{ $reviews->currentPage() == $i ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $reviews->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+
+                                <!-- Next Button -->
+                                <li class="page-item {{ $reviews->hasMorePages() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $reviews->nextPageUrl() }}" aria-label="Next">
+                                        <span aria-hidden="true">Next &raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <!-- Pagination Info -->
+                    <div class="pagination-info">
+                        Showing {{ $reviews->firstItem() }} to {{ $reviews->lastItem() }} of {{ $reviews->total() }} results
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
     <script src="{{ asset('script.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

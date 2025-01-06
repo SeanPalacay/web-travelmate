@@ -70,6 +70,7 @@ class DestinationController extends Controller
         return redirect()->back()->with('success', 'Destination added successfully!');
     }
     
+    
     public function saveCoordinates(Request $request, string $id)
     {
         $destination = Destination::findOrFail($id);
@@ -147,17 +148,33 @@ class DestinationController extends Controller
     }
     
     public function showApproved()
+{
+    // Get the locality of the logged-in admin
+    $adminLocality = auth()->user()->locality;
+
+    // Fetch only approved destinations that belong to the admin's locality
+    $destinations = Destination::where('status', 'approved')
+                                ->where('locality', $adminLocality)
+                                ->paginate(10); // Fetch 10 items per page
+
+    // Return the view with the filtered destinations
+    return view('admin/admin_destinations', [
+        'title' => 'Destinations',
+        'destinations' => $destinations
+    ]);
+}
+
+  /**
+     * Display destinations for owner (10 items per page).
+     */
+    public function showOwnerDestinations()
     {
-        // Get the locality of the logged-in admin
-        $adminLocality = auth()->user()->locality;
-    
-        // Fetch only approved destinations that belong to the admin's locality
-        $destinations = Destination::where('status', 'approved')
-                                    ->where('locality', $adminLocality)
-                                    ->paginate(50);
-    
+        // Fetch destinations for the owner (assuming owner-specific logic)
+        $destinations = Destination::where('user_id', auth()->id()) // Adjust this query as needed
+                                   ->paginate(10); // Fetch 10 items per page
+
         // Return the view with the filtered destinations
-        return view('admin/admin_destinations', [
+        return view('owner/destinations', [
             'title' => 'Destinations',
             'destinations' => $destinations
         ]);

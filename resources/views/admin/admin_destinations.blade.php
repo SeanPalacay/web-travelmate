@@ -1,129 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{ $title }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $title }}</title>
     <link rel="icon" href="{{ asset('assets/Travel.png') }}" type="image/x-icon">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
-	<link rel="stylesheet" href="{{ asset('styles.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles.css') }}">
     <style>
         /* Table Styles */
         .table {
+            width: 100%;
+            border-collapse: collapse;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             overflow: hidden;
             background-color: #ffffff;
+            margin-bottom: 20px;
         }
 
         .table th, .table td {
-            text-align: center; /* Center the table headers and cells */
             padding: 12px;
+            text-align: left;
             vertical-align: middle;
+            border-bottom: 1px solid #ddd;
         }
 
         .table th {
             background-color: #0D6EFD;
             color: #ffffff;
+            font-weight: 600;
             text-transform: uppercase;
             font-size: 0.875rem;
-            font-weight: 600;
         }
 
-        .table-hover tbody tr:hover {
-            background-color: #f1f1f1;
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
         .table-striped tbody tr:nth-of-type(odd) {
             background-color: #f9f9f9;
         }
 
-        .dropdown-menu {
-            min-width: auto;
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 0.875rem;
         }
 
-        .lni-more {
-            cursor: pointer;
+        .pagination .page-item {
+            margin: 0 4px;
+            list-style: none;
+        }
+
+        .pagination .page-item .page-link {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: #0D6EFD;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0D6EFD;
+            color: #fff;
+            border-color: #0D6EFD;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #f8f9fa;
+            border-color: #ddd;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #f1f1f1;
             color: #0D6EFD;
         }
 
-        .lni-more:hover {
-            color: #0b5ed7;
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            border-radius: 5px;
         }
 
-        /* Mobile responsiveness */
+        .pagination .page-item:first-child {
+            margin-right: 10px;
+        }
+
+        .pagination .page-item:last-child {
+            margin-left: 10px;
+        }
+
+        /* Pagination Info */
+        .pagination-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        /* Search and Filter Styles */
+        .search-filter-container {
+            display: flex;
+            gap: 10px; /* Space between search and filter */
+            margin-bottom: 20px;
+        }
+
+        .search-filter-container .input-group {
+            flex-grow: 1; /* Make both inputs take equal space */
+        }
+
+        .search-filter-container .form-control {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-filter-container .form-control:focus {
+            border-color: #0D6EFD;
+            box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+        }
+
+        .search-filter-container select.form-control {
+            appearance: none; /* Remove default arrow */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 30px; /* Space for the arrow */
+        }
+
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
-            .table thead {
-                display: none;
+            .search-filter-container {
+                flex-direction: column;
             }
 
-            .table tr {
-                display: block;
-                margin-bottom: 15px;
+            .search-filter-container .input-group {
+                width: 100%;
             }
-
-            .table td {
-                display: block;
-                text-align: right;
-                font-size: 0.875rem;
-                border-bottom: 1px solid #ddd;
-                padding: 8px;
-            }
-
-            .table td:before {
-                content: attr(data-label);
-                float: left;
-                font-weight: 600;
-                color: #495057;
-            }
-
-            .table td:last-child {
-                border-bottom: 0;
-            }
-
-            .table-responsive {
-                border: none;
-            }
-        }
-
-        /* Destinations text styling */
-        h1 {
-            color: #0D6EFD; /* Make "Destinations" text this color */
-            margin-top: 20px; /* Add some margin on top of the "Destinations" text */
         }
     </style>
 </head>
 <body>
-	<div class="wrapper">
-		@include('admin/partials/aside')
-		<div class="main p-3">
+    <div class="wrapper">
+        @include('admin/partials/aside')
+        <div class="main p-3">
             <div class="text-center">
                 <h1>Destinations</h1>
             </div>
             <div class="row justify-content-center mt-5">
-            	<div class="col-sm-12 col-md-10 col-lg-10">
-                    <x-filter 
-                        :options="[ 
-                            ['value' => 'Resort', 'label' => 'Resort'],
-                            ['value' => 'Hotel', 'label' => 'Hotel'],
-                            ['value' => 'Park', 'label' => 'Park'],
-                            ['value' => 'Adventure', 'label' => 'Adventure'],
-                            ['value' => 'Sports', 'label' => 'Sports'],
-                            ['value' => 'Wine & Beer', 'label' => 'Wine & Beer'],
-                            ['value' => 'Restaurant', 'label' => 'Restaurant'],
-                            ['value' => 'Fastfood', 'label' => 'Fastfood'],
-                            ['value' => 'Church', 'label' => 'Church'],
-                            ['value' => 'Art Galleries', 'label' => 'Art Galleries']
-                        ]"
-                        rowSelector="#destinationsTable tr"
-                        columnIndex="3"
-                        defaultLabel="All Destinations"
-                    />
-            		<div class="table-responsive">
-            			<table class="table table-hover table-striped">
-            				<thead>
+                <div class="col-sm-12 col-md-10 col-lg-10">
+                    <!-- Search and Filter -->
+                    <div class="search-filter-container mb-3 d-flex gap-2">
+                        <div class="input-group flex-grow-1">
+                            <input type="search" id="searchInput" placeholder="Search..." class="form-control">
+                        </div>
+                        <div class="input-group flex-grow-1">
+                            <select id="filterSelect" class="form-control">
+                                <option value="">All Destinations</option>
+                                <option value="Resort">Resort</option>
+                                <option value="Hotel">Hotel</option>
+                                <option value="Park">Park</option>
+                                <option value="Adventure">Adventure</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Wine & Beer">Wine & Beer</option>
+                                <option value="Restaurant">Restaurant</option>
+                                <option value="Fastfood">Fastfood</option>
+                                <option value="Church">Church</option>
+                                <option value="Art Galleries">Art Galleries</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
                                     <th>#</th>
                                     <th>Company Name</th>
                                     <th>Destination</th>
@@ -132,12 +195,12 @@
                                     <th>Address</th>
                                     <th>Locality</th>
                                     <th>Actions</th>
-            				</thead>
-            				<tbody id="destinationsTable">
-            					@forelse ($destinations as $destination)
-
+                                </tr>
+                            </thead>
+                            <tbody id="destinationsTable">
+                                @forelse ($destinations as $destination)
                                     <tr>
-                                        <td data-label="#"> {{ $loop->iteration }} </td>
+                                        <td data-label="#">{{ ($destinations->currentPage() - 1) * $destinations->perPage() + $loop->iteration }}</td>
                                         <td data-label="Company Name">{{ $destination->company_name }}</td>
                                         <td data-label="Destination">{{ $destination->destination_name }}</td>
                                         <td data-label="Category">{{ $destination->category }}</td>
@@ -159,22 +222,96 @@
                                         </td>
                                     </tr>
                                 @empty
-
-                                <tr>
-                                    <td colspan="10" class="text-center">No data yet</td>
-                                </tr>
-
+                                    <tr>
+                                        <td colspan="8" class="text-center">No data yet</td>
+                                    </tr>
                                 @endforelse
-            				</tbody>
-            			</table>
-            		</div>
-            	</div>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <!-- Previous Button -->
+                                <li class="page-item {{ $destinations->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $destinations->previousPageUrl() }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Previous</span>
+                                    </a>
+                                </li>
+
+                                <!-- Page Numbers -->
+                                @for ($i = 1; $i <= $destinations->lastPage(); $i++)
+                                    <li class="page-item {{ $destinations->currentPage() == $i ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $destinations->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+
+                                <!-- Next Button -->
+                                <li class="page-item {{ $destinations->hasMorePages() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $destinations->nextPageUrl() }}" aria-label="Next">
+                                        <span aria-hidden="true">Next &raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <!-- Pagination Info -->
+                    <div class="pagination-info">
+                        Showing {{ $destinations->firstItem() }} to {{ $destinations->lastItem() }} of {{ $destinations->total() }} results
+                    </div>
+                </div>
             </div>
         </div>
-	</div>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    <script src="{{ asset('script.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            const filterSelect = document.getElementById('filterSelect');
+            const tableRows = document.querySelectorAll('#destinationsTable tr');
+
+            // Function to filter table rows
+            function filterTable() {
+                const searchText = searchInput.value.toLowerCase();
+                const filterValue = filterSelect.value.toLowerCase();
+
+                tableRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    let shouldDisplay = true;
+
+                    // Filter by search input
+                    if (searchText) {
+                        let rowMatchesSearch = false;
+                        cells.forEach(cell => {
+                            if (cell.textContent.toLowerCase().includes(searchText)) {
+                                rowMatchesSearch = true;
+                            }
+                        });
+                        shouldDisplay = shouldDisplay && rowMatchesSearch;
+                    }
+
+                    // Filter by category dropdown
+                    if (filterValue) {
+                        const categoryCell = cells[3]; // Category is the 4th column (index 3)
+                        if (categoryCell.textContent.toLowerCase() !== filterValue) {
+                            shouldDisplay = false;
+                        }
+                    }
+
+                    // Show or hide the row
+                    row.style.display = shouldDisplay ? '' : 'none';
+                });
+            }
+
+            // Add event listeners
+            searchInput.addEventListener('input', filterTable);
+            filterSelect.addEventListener('change', filterTable);
+        });
+    </script>
 </body>
 </html>

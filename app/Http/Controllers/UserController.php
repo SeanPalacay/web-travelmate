@@ -21,7 +21,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::paginate(10); // Fetch users with 10 items per page
+        return view('users.index', compact('users'));
     }
 
     public function login(LoginAccountRequest $request)

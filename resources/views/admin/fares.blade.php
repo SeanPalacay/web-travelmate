@@ -53,6 +53,68 @@
             color: #0b5ed7;
         }
 
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 0.875rem;
+        }
+
+        .pagination .page-item {
+            margin: 0 4px;
+            list-style: none;
+        }
+
+        .pagination .page-item .page-link {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: #0D6EFD;
+            text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0D6EFD;
+            color: #fff;
+            border-color: #0D6EFD;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #f8f9fa;
+            border-color: #ddd;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #f1f1f1;
+            color: #0D6EFD;
+        }
+
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            border-radius: 5px;
+        }
+
+        .pagination .page-item:first-child {
+            margin-right: 10px;
+        }
+
+        .pagination .page-item:last-child {
+            margin-left: 10px;
+        }
+
+        /* Pagination Info */
+        .pagination-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .table thead {
@@ -164,7 +226,7 @@
                             <tbody id="faresTableBody">
                                 @forelse ($fares as $fare)
                                     <tr>
-                                        <td data-label="#"> {{ $loop->iteration }} </td>
+                                        <td data-label="#">{{ ($fares->currentPage() - 1) * $fares->perPage() + $loop->iteration }}</td>
                                         <td data-label="Vehicle">{{ $fare->vehicle }}</td>
                                         <td data-label="Locality">{{ $fare->designated_locality }}</td>
                                         <td data-label="Operating Hours">{{ $fare->operating_hours }}</td>
@@ -192,6 +254,39 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination Links -->
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <!-- Previous Button -->
+                                <li class="page-item {{ $fares->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $fares->previousPageUrl() }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Previous</span>
+                                    </a>
+                                </li>
+
+                                <!-- Page Numbers -->
+                                @for ($i = 1; $i <= $fares->lastPage(); $i++)
+                                    <li class="page-item {{ $fares->currentPage() == $i ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $fares->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+
+                                <!-- Next Button -->
+                                <li class="page-item {{ $fares->hasMorePages() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $fares->nextPageUrl() }}" aria-label="Next">
+                                        <span aria-hidden="true">Next &raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <!-- Pagination Info -->
+                    <div class="pagination-info">
+                        Showing {{ $fares->firstItem() }} to {{ $fares->lastItem() }} of {{ $fares->total() }} results
+                    </div>
                 </div>
             </div>
         </div>
@@ -201,25 +296,28 @@
         crossorigin="anonymous"></script>
     <script>
         // Vehicle filter functionality
-        document.getElementById('vehicleFilter').addEventListener('change', function() {
-            filterTable();
-        });
-
-        function filterTable() {
-            const filterValue = document.getElementById('vehicleFilter').value.toLowerCase();
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterDropdown = document.querySelector('[data-filter-dropdown]');
             const rows = document.querySelectorAll('#faresTableBody tr');
 
-            rows.forEach(row => {
-                const cells = row.getElementsByTagName('td');
-                const vehicle = cells[1]?.textContent.trim().toLowerCase();
-
-                if (filterValue === 'all' || vehicle === filterValue) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
+            if (filterDropdown) {
+                filterDropdown.addEventListener('change', function() {
+                    const filterValue = this.value.toLowerCase();
+                    
+                    rows.forEach(row => {
+                        const vehicleCell = row.children[1];
+                        if (vehicleCell) {
+                            const vehicleText = vehicleCell.textContent.trim().toLowerCase();
+                            if (filterValue === '' || vehicleText === filterValue) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        }
+                    });
+                });
+            }
+        });
     </script>
     <script src="{{ asset('script.js') }}"></script>
 </body>
