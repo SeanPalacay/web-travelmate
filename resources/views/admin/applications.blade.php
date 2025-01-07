@@ -184,24 +184,28 @@
                     @endif
 
                     <!-- Destination Filter Dropdown -->
-                    <x-filter 
-                        :options="[ 
-                            ['value' => 'Resort', 'label' => 'Resort'],
-                            ['value' => 'Hotel', 'label' => 'Hotel'],
-                            ['value' => 'Park', 'label' => 'Park'],
-                            ['value' => 'Adventure', 'label' => 'Adventure'],
-                            ['value' => 'Sports', 'label' => 'Sports'],
-                            ['value' => 'Wine & Beer', 'label' => 'Wine & Beer'],
-                            ['value' => 'Restaurant', 'label' => 'Restaurant'],
-                            ['value' => 'Fastfood', 'label' => 'Fastfood'],
-                            ['value' => 'Church', 'label' => 'Church'],
-                            ['value' => 'Art Galleries', 'label' => 'Art Galleries']
-                        ]"
-                        rowSelector="#applicationsTable tr"
-                        columnIndex="3"
-                        defaultLabel="All Destinations"
-                    />
-
+                 <!-- Search and Filter Form -->
+<form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+    <div class="input-group flex-grow-1">
+        <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+    </div>
+    <div class="input-group flex-grow-1">
+        <select name="category" id="filterSelect" class="form-control">
+            <option value="">All Categories</option>
+            <option value="Resort" {{ request('category') == 'Resort' ? 'selected' : '' }}>Resort</option>
+            <option value="Hotel" {{ request('category') == 'Hotel' ? 'selected' : '' }}>Hotel</option>
+            <option value="Park" {{ request('category') == 'Park' ? 'selected' : '' }}>Park</option>
+            <option value="Adventure" {{ request('category') == 'Adventure' ? 'selected' : '' }}>Adventure</option>
+            <option value="Sports" {{ request('category') == 'Sports' ? 'selected' : '' }}>Sports</option>
+            <option value="Wine & Beer" {{ request('category') == 'Wine & Beer' ? 'selected' : '' }}>Wine & Beer</option>
+            <option value="Restaurant" {{ request('category') == 'Restaurant' ? 'selected' : '' }}>Restaurant</option>
+            <option value="Fastfood" {{ request('category') == 'Fastfood' ? 'selected' : '' }}>Fastfood</option>
+            <option value="Church" {{ request('category') == 'Church' ? 'selected' : '' }}>Church</option>
+            <option value="Art Galleries" {{ request('category') == 'Art Galleries' ? 'selected' : '' }}>Art Galleries</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Apply</button>
+</form>
                     <div class="table-responsive">
                         <table class="table table-hover table-striped">
                             <thead>

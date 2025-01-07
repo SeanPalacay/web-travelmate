@@ -158,6 +158,19 @@
     </style>
 </head>
 <body>
+    @auth
+    @if (auth()->user()->locality)
+        <!-- Display fares -->
+    @else
+        <div class="alert alert-warning">
+            Your locality is not set. Please update your profile.
+        </div>
+    @endif
+@else
+    <div class="alert alert-danger">
+        You must be logged in to view fares.
+    </div>
+@endauth
     <div class="wrapper">
         @include('admin/partials/aside')
         <div class="main p-3">
@@ -194,19 +207,24 @@
                     @endif
 
                     <!-- Vehicle Filter Dropdown -->
-                    <x-filter 
-                        :options="[ 
-                            ['value' => 'e-trike', 'label' => 'E-Trike'],
-                            ['value' => 'traditional jeepney', 'label' => 'Traditional Jeepney'],
-                            ['value' => 'modern jeepney', 'label' => 'Modern Jeepney'],
-                            ['value' => 'tricycle', 'label' => 'Tricycle'],
-                            ['value' => 'taxi', 'label' => 'Taxi'],
-                            ['value' => 'padyak', 'label' => 'Padyak']
-                        ]"
-                        rowSelector="#faresTableBody tr"
-                        columnIndex="1"
-                        defaultLabel="All Vehicles"
-                    />
+                <!-- Search and Filter Form -->
+<form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+    <div class="input-group flex-grow-1">
+        <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+    </div>
+    <div class="input-group flex-grow-1">
+        <select name="vehicle" id="filterSelect" class="form-control">
+            <option value="">All Vehicles</option>
+            <option value="e-trike" {{ request('vehicle') == 'e-trike' ? 'selected' : '' }}>E-Trike</option>
+            <option value="traditional jeepney" {{ request('vehicle') == 'traditional jeepney' ? 'selected' : '' }}>Traditional Jeepney</option>
+            <option value="modern jeepney" {{ request('vehicle') == 'modern jeepney' ? 'selected' : '' }}>Modern Jeepney</option>
+            <option value="tricycle" {{ request('vehicle') == 'tricycle' ? 'selected' : '' }}>Tricycle</option>
+            <option value="taxi" {{ request('vehicle') == 'taxi' ? 'selected' : '' }}>Taxi</option>
+            <option value="padyak" {{ request('vehicle') == 'padyak' ? 'selected' : '' }}>Padyak</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Apply</button>
+</form>
 
                     <div class="table-responsive">
                         <table class="table table-hover table-striped">
@@ -256,33 +274,33 @@
                     </div>
 
                     <!-- Pagination Links -->
-                    <div class="d-flex justify-content-center mt-4">
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination">
-                                <!-- Previous Button -->
-                                <li class="page-item {{ $fares->onFirstPage() ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ $fares->previousPageUrl() }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo; Previous</span>
-                                    </a>
-                                </li>
+                 <!-- Pagination Links -->
+<div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <!-- Previous Button -->
+            <li class="page-item {{ $fares->onFirstPage() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ $fares->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo; Previous</span>
+                </a>
+            </li>
 
-                                <!-- Page Numbers -->
-                                @for ($i = 1; $i <= $fares->lastPage(); $i++)
-                                    <li class="page-item {{ $fares->currentPage() == $i ? 'active' : '' }}">
-                                        <a class="page-link" href="{{ $fares->url($i) }}">{{ $i }}</a>
-                                    </li>
-                                @endfor
+            <!-- Page Numbers -->
+            @for ($i = 1; $i <= $fares->lastPage(); $i++)
+                <li class="page-item {{ $fares->currentPage() == $i ? 'active' : '' }}">
+                    <a class="page-link" href="{{ $fares->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                </li>
+            @endfor
 
-                                <!-- Next Button -->
-                                <li class="page-item {{ $fares->hasMorePages() ? '' : 'disabled' }}">
-                                    <a class="page-link" href="{{ $fares->nextPageUrl() }}" aria-label="Next">
-                                        <span aria-hidden="true">Next &raquo;</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-
+            <!-- Next Button -->
+            <li class="page-item {{ $fares->hasMorePages() ? '' : 'disabled' }}">
+                <a class="page-link" href="{{ $fares->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
+                    <span aria-hidden="true">Next &raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
                     <!-- Pagination Info -->
                     <div class="pagination-info">
                         Showing {{ $fares->firstItem() }} to {{ $fares->lastItem() }} of {{ $fares->total() }} results
@@ -294,31 +312,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    <script>
-        // Vehicle filter functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterDropdown = document.querySelector('[data-filter-dropdown]');
-            const rows = document.querySelectorAll('#faresTableBody tr');
-
-            if (filterDropdown) {
-                filterDropdown.addEventListener('change', function() {
-                    const filterValue = this.value.toLowerCase();
-                    
-                    rows.forEach(row => {
-                        const vehicleCell = row.children[1];
-                        if (vehicleCell) {
-                            const vehicleText = vehicleCell.textContent.trim().toLowerCase();
-                            if (filterValue === '' || vehicleText === filterValue) {
-                                row.style.display = '';
-                            } else {
-                                row.style.display = 'none';
-                            }
-                        }
-                    });
-                });
-            }
-        });
-    </script>
     <script src="{{ asset('script.js') }}"></script>
 </body>
 </html>

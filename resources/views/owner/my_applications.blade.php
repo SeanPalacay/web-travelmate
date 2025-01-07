@@ -183,23 +183,29 @@
                     @endif
 
                     <!-- Destination Filter Dropdown -->
-                    <x-filter 
-                        :options="[
-                            ['value' => 'Resort', 'label' => 'Resort'],
-                            ['value' => 'Hotel', 'label' => 'Hotel'],
-                            ['value' => 'Park', 'label' => 'Park'],
-                            ['value' => 'Adventure', 'label' => 'Adventure'],
-                            ['value' => 'Sports', 'label' => 'Sports'],
-                            ['value' => 'Wine & Beer', 'label' => 'Wine & Beer'],
-                            ['value' => 'Restaurant', 'label' => 'Restaurant'],
-                            ['value' => 'Fastfood', 'label' => 'Fastfood'],
-                            ['value' => 'Church', 'label' => 'Church'],
-                            ['value' => 'Art Galleries', 'label' => 'Art Galleries']
-                        ]"
-                        rowSelector="#myApplicationsTable tr"
-                        columnIndex="3"
-                        defaultLabel="All Destinations"
-                    />
+             <!-- Search and Filter Form -->
+<!-- Search and Filter Form -->
+<form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+    <div class="input-group flex-grow-1">
+        <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+    </div>
+    <div class="input-group flex-grow-1">
+        <select name="category" id="filterSelect" class="form-control">
+            <option value="">All Categories</option>
+            <option value="Resort" {{ request('category') == 'Resort' ? 'selected' : '' }}>Resort</option>
+            <option value="Hotel" {{ request('category') == 'Hotel' ? 'selected' : '' }}>Hotel</option>
+            <option value="Park" {{ request('category') == 'Park' ? 'selected' : '' }}>Park</option>
+            <option value="Adventure" {{ request('category') == 'Adventure' ? 'selected' : '' }}>Adventure</option>
+            <option value="Sports" {{ request('category') == 'Sports' ? 'selected' : '' }}>Sports</option>
+            <option value="Wine & Beer" {{ request('category') == 'Wine & Beer' ? 'selected' : '' }}>Wine & Beer</option>
+            <option value="Restaurant" {{ request('category') == 'Restaurant' ? 'selected' : '' }}>Restaurant</option>
+            <option value="Fastfood" {{ request('category') == 'Fastfood' ? 'selected' : '' }}>Fastfood</option>
+            <option value="Church" {{ request('category') == 'Church' ? 'selected' : '' }}>Church</option>
+            <option value="Art Galleries" {{ request('category') == 'Art Galleries' ? 'selected' : '' }}>Art Galleries</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Apply</button>
+</form>
 
                     <div class="table-responsive">
                         <table class="table table-hover table-striped">
@@ -248,33 +254,33 @@
                         </table>
                     </div>
 
-                    <!-- Pagination Links -->
-                    <div class="d-flex justify-content-center mt-4">
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination">
-                                <!-- Previous Button -->
-                                <li class="page-item {{ $applications->onFirstPage() ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ $applications->previousPageUrl() }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo; Previous</span>
-                                    </a>
-                                </li>
+<!-- Pagination Links -->
+<div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <!-- Previous Button -->
+            <li class="page-item {{ $applications->onFirstPage() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ $applications->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo; Previous</span>
+                </a>
+            </li>
 
-                                <!-- Page Numbers -->
-                                @for ($i = 1; $i <= $applications->lastPage(); $i++)
-                                    <li class="page-item {{ $applications->currentPage() == $i ? 'active' : '' }}">
-                                        <a class="page-link" href="{{ $applications->url($i) }}">{{ $i }}</a>
-                                    </li>
-                                @endfor
+            <!-- Page Numbers -->
+            @for ($i = 1; $i <= $applications->lastPage(); $i++)
+                <li class="page-item {{ $applications->currentPage() == $i ? 'active' : '' }}">
+                    <a class="page-link" href="{{ $applications->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                </li>
+            @endfor
 
-                                <!-- Next Button -->
-                                <li class="page-item {{ $applications->hasMorePages() ? '' : 'disabled' }}">
-                                    <a class="page-link" href="{{ $applications->nextPageUrl() }}" aria-label="Next">
-                                        <span aria-hidden="true">Next &raquo;</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+            <!-- Next Button -->
+            <li class="page-item {{ $applications->hasMorePages() ? '' : 'disabled' }}">
+                <a class="page-link" href="{{ $applications->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
+                    <span aria-hidden="true">Next &raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
 
                     <!-- Pagination Info -->
                     <div class="pagination-info">

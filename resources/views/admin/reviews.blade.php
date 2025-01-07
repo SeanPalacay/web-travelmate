@@ -160,7 +160,7 @@
 <body>
     <div class="wrapper">
         @include('admin/partials/aside')
-        <div class="main p-3">
+        <div class="main p-20">
             <div class="text-center">
                 <h1>Reviews</h1>
             </div>
@@ -183,20 +183,25 @@
                         </div>
                     @endif
 
-                    <!-- Filter Dropdown for Review Ratings -->
-                    <x-filter 
-                        :options="[ 
-                            ['value' => '1', 'label' => '1'],
-                            ['value' => '2', 'label' => '2'],
-                            ['value' => '3', 'label' => '3'],
-                            ['value' => '4', 'label' => '4'],
-                            ['value' => '5', 'label' => '5']
-                        ]"
-                        rowSelector="#reviewsTable tr"
-                        columnIndex="5"
-                        defaultLabel="Rating"
-                    />
+                    <!-- Search and Filter Form -->
+                    <form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+                        <div class="input-group flex-grow-1">
+                            <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+                        </div>
+                        <div class="input-group flex-grow-1">
+                            <select name="rating" id="ratingFilter" class="form-control">
+                                <option value="">All Ratings</option>
+                                <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1</option>
+                                <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2</option>
+                                <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3</option>
+                                <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4</option>
+                                <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                    </form>
 
+                    <!-- Table -->
                     <div class="table-responsive">
                         <table class="table table-hover table-striped">
                             <thead>
@@ -213,55 +218,53 @@
                             </thead>
                             <tbody id="reviewsTable">
                                 @forelse ($reviews as $review)
-                                <tr>
-                                    <td data-label="#">{{ ($reviews->currentPage() - 1) * $reviews->perPage() + $loop->iteration }}</td>
-                                    <td data-label="Company Name">{{ $review->destination->company_name }}</td>
-                                    <td data-label="Destination">{{ $review->destination->destination_name }}</td>
-                                    <td data-label="Review Title">{{ $review->review_title }}</td>
-                                    <td data-label="Reviewer">{{ $review->user->firstname }} {{ $review->user->lastname }}</td>
-                                    <td data-label="Ratings">{{ $review->rating }}</td>
-                                    <td data-label="Date Created">{{ $review->formatted_created_at }}</td>
-                                    <td data-label="Action">
-                                        <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
-                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-                                            <!-- Unique Modal for Proof -->
-                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
-                                            <form action="/admin/reviews/delete/{{ $review->id }}" method="POST" class="w-100" style="display: inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item">Delete</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Modal for Proof & Comment (Unique per Review) -->
-                                <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow-lg">
-                                            <div class="modal-header bg-light">
-                                                <h1 class="modal-title fs-4 fw-bold text-dark" id="proofLabel{{ $review->_id }}">Proof & Comment</h1>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <tr>
+                                        <td data-label="#">{{ ($reviews->currentPage() - 1) * $reviews->perPage() + $loop->iteration }}</td>
+                                        <td data-label="Company Name">{{ $review->destination->company_name }}</td>
+                                        <td data-label="Destination">{{ $review->destination->destination_name }}</td>
+                                        <td data-label="Review Title">{{ $review->review_title }}</td>
+                                        <td data-label="Reviewer">{{ $review->user->firstname }} {{ $review->user->lastname }}</td>
+                                        <td data-label="Ratings">{{ $review->rating }}</td>
+                                        <td data-label="Date Created">{{ $review->formatted_created_at }}</td>
+                                        <td data-label="Actions">
+                                            <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
+                                                <form action="/admin/reviews/delete/{{ $review->id }}" method="POST" class="w-100" style="display: inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item">Delete</button>
+                                                </form>
                                             </div>
-                                            <div class="modal-body">
-                                                @if($review->proof)
-                                                <img class="img-fluid rounded mb-4 shadow-sm" 
-                                                     src="https://travelmate-be.onrender.com/{{ $review->proof }}" 
-                                                     alt="Proof"
-                                                     onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
-                                                @else
-                                                <p class="text-muted">No proof image available</p>
-                                                @endif
-                                                <p class="text-muted mt-3">{{ $review->comment ?? 'No comment available' }}</p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Modal for Proof & Comment (Unique per Review) -->
+                                    <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow-lg">
+                                                <div class="modal-header bg-light">
+                                                    <h1 class="modal-title fs-4 fw-bold text-dark" id="proofLabel{{ $review->_id }}">Proof & Comment</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    @if($review->proof)
+                                                        <img class="img-fluid rounded mb-4 shadow-sm" 
+                                                             src="https://travelmate-be.onrender.com/{{ $review->proof }}" 
+                                                             alt="Proof"
+                                                             onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
+                                                    @else
+                                                        <p class="text-muted">No proof image available</p>
+                                                    @endif
+                                                    <p class="text-muted mt-3">{{ $review->comment ?? 'No comment available' }}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-
                                 @empty
-                                <tr>
-                                    <td colspan="8" class="text-center">No data yet</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="8" class="text-center">No data yet</td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -273,7 +276,7 @@
                             <ul class="pagination">
                                 <!-- Previous Button -->
                                 <li class="page-item {{ $reviews->onFirstPage() ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ $reviews->previousPageUrl() }}" aria-label="Previous">
+                                    <a class="page-link" href="{{ $reviews->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo; Previous</span>
                                     </a>
                                 </li>
@@ -281,13 +284,13 @@
                                 <!-- Page Numbers -->
                                 @for ($i = 1; $i <= $reviews->lastPage(); $i++)
                                     <li class="page-item {{ $reviews->currentPage() == $i ? 'active' : '' }}">
-                                        <a class="page-link" href="{{ $reviews->url($i) }}">{{ $i }}</a>
+                                        <a class="page-link" href="{{ $reviews->appends(request()->query())->url($i) }}">{{ $i }}</a>
                                     </li>
                                 @endfor
 
                                 <!-- Next Button -->
                                 <li class="page-item {{ $reviews->hasMorePages() ? '' : 'disabled' }}">
-                                    <a class="page-link" href="{{ $reviews->nextPageUrl() }}" aria-label="Next">
+                                    <a class="page-link" href="{{ $reviews->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
                                         <span aria-hidden="true">Next &raquo;</span>
                                     </a>
                                 </li>
@@ -306,30 +309,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    <script src="{{ asset('script.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterDropdown = document.querySelector('[data-filter-dropdown]');
-            const rows = document.querySelectorAll('#reviewsTable tr');
-
-            if (filterDropdown) {
-                filterDropdown.addEventListener('change', function() {
-                    const filterValue = this.value;
-                    
-                    rows.forEach(row => {
-                        const ratingCell = row.children[5];
-                        if (ratingCell) {
-                            const ratingText = ratingCell.textContent.trim();
-                            if (filterValue === '' || ratingText === filterValue) {
-                                row.style.display = '';
-                            } else {
-                                row.style.display = 'none';
-                            }
-                        }
-                    });
-                });
-            }
-        });
-    </script>
 </body>
 </html>

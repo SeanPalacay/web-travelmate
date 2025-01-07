@@ -117,48 +117,56 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('owner')->prefix('owner')->group(function () {
         Route::get('dashboard', function () {
-            return view('owner/dashboard', ['title' => 'Dashboard']);
-        });
-
-
-        Route::get('dashboard', function () {
-            $reviewCount = Review::count();
-            $destinationCount = Destination::where('status', 'approved')->count();
-            $applicationCount = Destination::where('status', 'pending')->count();
-            $declinedCount = Destination::where('status', 'declined')->count();
-        
-            // Get the currently authenticated user
+            // Get the logged-in owner
             $user = Auth::user();
-        
+    
+            // Fetch counts based on the owner's ID
+            $reviewCount = Review::whereHas('destination', function($query) use ($user) {
+                $query->where('user_id', $user->id); // Filter by owner's ID
+            })->count();
+    
+            $destinationCount = Destination::where('user_id', $user->id)
+                                           ->where('status', 'approved')
+                                           ->count();
+    
+            $applicationCount = Destination::where('user_id', $user->id)
+                                           ->where('status', 'pending')
+                                           ->count();
+    
+            $declinedCount = Destination::where('user_id', $user->id)
+                                        ->where('status', 'declined')
+                                        ->count();
+    
+            // Return the view with the filtered data
             return view('owner/dashboard', [
                 'title' => 'Dashboard',
                 'reviewCount' => $reviewCount,
-                'applicationCount' => $applicationCount,
                 'destinationCount' => $destinationCount,
+                'applicationCount' => $applicationCount,
                 'declinedCount' => $declinedCount,
                 'user' => $user, // Pass the user object to the view
             ]);
         });
-
+    
         Route::get('applications/create', function () {
             return view('owner/create_destination', ['title' => 'Application']);
         });
+    
         Route::post('destinations/store', [DestinationController::class, 'store'])->withoutMiddleware('owner');
-        Route::get('applications', function () {
-            $applications = Destination::whereIn('status', ['declined', 'pending'])
-                ->where('user_id', auth()->user()->id)
-                ->paginate(10);
-        
-            return view('owner/my_applications', ['title' => 'My Applications', 'applications' => $applications]);
-        });
-        
-        Route::get('destinations', function () {
-            $destinations = Destination::where('status', 'approved')
-                ->where('user_id', auth()->user()->id)
-                ->paginate(10);
+    
+        Route::get('applications', [DestinationController::class, 'showOwnerApplications'])->name('owner.applications');
 
-            return view('owner/destinations', ['title' => 'Destinations', 'destinations' => $destinations]);
-        });
+        // Route::get('applications', function () {
+        //     $applications = Destination::whereIn('status', ['declined', 'pending'])
+        //         ->where('user_id', auth()->user()->id)
+        //         ->paginate(10);
+        
+        //     return view('owner/my_applications', ['title' => 'My Applications', 'applications' => $applications]);
+        // });
+        
+        // Updated route to use the controller method
+        Route::get('destinations', [DestinationController::class, 'showOwnerDestinations']);
+    
         Route::delete('destinations/delete/{application}', [DestinationController::class, 'destroy']);
         Route::delete('applications/delete/{application}', [DestinationController::class, 'applicationdestroy']);
         Route::delete('applications/delete/{application}', [DestinationController::class, 'destinationdestroy']);
@@ -168,28 +176,9 @@ Route::middleware('auth')->group(function () {
         Route::get('applications/edit/{application}', [DestinationController::class, 'edit']);
         Route::put('applications/update/{destination}', [DestinationController::class, 'ownerupdate']);
         Route::post('destination/map/{destination}', [DestinationController::class, 'saveCoordinates']);
-        // Route::get('reviews', function () {
-        //     $userId = auth()->user()->id;
-
-        //     $reviews = Review::whereHas('destination', function ($query) use ($userId) {
-        //         $query->where('user_id', $userId);
-        //     })->where('status', '!=', 'declined')->paginate(50);
-
-        //     return view('owner/reviews', ['title' => 'Reviews', 'reviews' => $reviews]);
-        // });
-
+    
         Route::get('reviews', [ReviewController::class, 'ownerindex']);
-
-        // Route::get('reviews', function () {
-        //     $reviews = Review::whereHas('destination', function ($query) {
-        //             $query->where('user_id', auth()->user()->id);
-        //         })
-        //         ->paginate(50);
-        
-        //     return view('owner/reviews', ['title' => 'My Reviews', 'reviews' => $reviews]);
-        // });
-        
-
+    
         Route::post('reports/store', [ReportController::class, 'store']);
     });
 
@@ -203,8 +192,9 @@ Route::middleware('auth')->group(function () {
                 $query->where('locality', $adminLocality);
             })->count();
         
-            $fareCount = Fare::count();
-
+            // Fetch fare count filtered by the admin's locality
+            $fareCount = Fare::where('designated_locality', $adminLocality)->count();
+        
             $reportCount = Report::whereHas('review.destination', function($query) use ($adminLocality) {
                 $query->where('locality', $adminLocality);
             })->count();
@@ -236,24 +226,8 @@ Route::middleware('auth')->group(function () {
                 'user' => $user, // Pass the user object to the view
             ]);
         });
-        
 
-        Route::get('applications', function () {
-            // Get the locality of the logged-in admin
-            $adminLocality = auth()->user()->locality;
-        
-            // Fetch applications where the status is 'pending' and the locality matches the admin's locality
-            $applications = Destination::with('user')
-                                        ->where('status', 'pending')
-                                        ->where('locality', $adminLocality) // Filter by admin's locality
-                                        ->paginate(10);
-        
-            // Return the view with the filtered applications
-            return view('admin/applications', [
-                'title' => 'Applications',
-                'applications' => $applications
-            ]);
-        });
+        Route::get('applications', [DestinationController::class, 'showAdminApplications'])->name('admin.applications');
         
 
         Route::get('applications/view/{application}', [DestinationController::class, 'showapplication']);
@@ -272,20 +246,8 @@ Route::middleware('auth')->group(function () {
         Route::get('fares/create', function () {
             return view('admin/create_fare', ['title' => 'Create a Fare']);
         });
-
-        Route::get('fares', function () {
-            // Get the locality of the logged-in admin
-            $adminLocality = auth()->user()->locality;
         
-            // Fetch fares that belong to the admin's locality
-            $fares = Fare::where('designated_locality', $adminLocality)->paginate(10);
-        
-            // Return the view with the filtered fares
-            return view('admin/fares', [
-                'title' => 'Fares',
-                'fares' => $fares
-            ]);
-        });
+        Route::get('fares', [FareController::class, 'index'])->name('admin.fares');
         
 
         Route::post('fares/store', [FareController::class, 'store']);
@@ -305,38 +267,11 @@ Route::middleware('auth')->group(function () {
         
 
 
-        Route::get('reports', function () {
-            // Get the locality of the logged-in admin
-            $adminLocality = auth()->user()->locality;
-        
-            // Fetch reports where the status is 'pending' and the review's destination belongs to the admin's locality
-            $reports = Report::where('status', 'pending')
-                        ->whereHas('review.destination', function($query) use ($adminLocality) {
-                            $query->where('locality', $adminLocality); // Filter by admin's locality
-                        })
-                        ->with(['review', 'review.destination'])
-                        ->paginate(10);
-        
-            // Convert created_at to Asia/Manila timezone for each report and change the format
-            foreach ($reports as $report) {
-                if ($report->created_at) {
-                    $report->formatted_created_at = Carbon::parse($report->created_at)
-                        ->setTimezone('Asia/Manila')
-                        ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
-                }
-            }
-        
-            // Return the view with the filtered reports
-            return view('admin/reports', [
-                'title' => 'Reports',
-                'reports' => $reports
-            ]);
-        });
-        
+        Route::get('reports', [ReportController::class, 'index'])->name('admin.reports');
         
         
 
         Route::patch('reports/approve/{report}', [ReportController::class, 'approve']);
-        Route::patch('reports/decline/{report}', [ReportController::class, 'decline']);
+        Route::patch('12/decline/{report}', [ReportController::class, 'decline']);
     });
 });

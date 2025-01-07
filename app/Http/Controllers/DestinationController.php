@@ -146,59 +146,163 @@ class DestinationController extends Controller
 
         return view("$folder/destination_landing", ['title' => $destination->destination_name, 'destination' => $destination]);
     }
-    
-    public function showApproved()
+
+
+    public function showAdminApplications(Request $request)
 {
     // Get the locality of the logged-in admin
     $adminLocality = auth()->user()->locality;
 
-    // Fetch only approved destinations that belong to the admin's locality
-    $destinations = Destination::where('status', 'approved')
-                                ->where('locality', $adminLocality)
-                                ->paginate(10); // Fetch 10 items per page
+    // Start the query for pending applications in the admin's locality
+    $query = Destination::with('user')
+                        ->where('status', 'pending')
+                        ->where('locality', $adminLocality);
+
+    // Handle search
+    if ($request->has('search') && $request->search != '') {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('destination_name', 'like', '%' . $search . '%')
+              ->orWhere('destination_address', 'like', '%' . $search . '%')
+              ->orWhere('locality', 'like', '%' . $search . '%')
+              ->orWhereHas('user', function ($q) use ($search) {
+                  $q->where('firstname', 'like', '%' . $search . '%')
+                    ->orWhere('lastname', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+              });
+        });
+    }
+
+    // Handle filter by category
+    if ($request->has('category') && $request->category != '') {
+        $query->where('category', $request->category);
+    }
+
+    // Paginate the results with 10 items per page
+    $applications = $query->paginate(10);
+
+    // Return the view with the filtered applications
+    return view('admin/applications', [
+        'title' => 'Pending Applications',
+        'applications' => $applications,
+        'search' => $request->search, // Pass search term back to the view
+        'category' => $request->category, // Pass selected category back to the view
+    ]);
+}
+    
+public function showApproved(Request $request)
+{
+    // Get the locality of the logged-in admin
+    $adminLocality = auth()->user()->locality;
+
+    // Start the query for approved destinations in the admin's locality
+    $query = Destination::where('status', 'approved')
+                        ->where('locality', $adminLocality);
+
+    // Handle search
+    if ($request->has('search') && $request->search != '') {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('company_name', 'like', '%' . $search . '%')
+              ->orWhere('destination_name', 'like', '%' . $search . '%')
+              ->orWhere('destination_address', 'like', '%' . $search . '%')
+              ->orWhere('locality', 'like', '%' . $search . '%');
+        });
+    }
+
+    // Handle filter by category
+    if ($request->has('category') && $request->category != '') {
+        $query->where('category', $request->category);
+    }
+
+    // Paginate the results with 10 items per page
+    $destinations = $query->paginate(10);
 
     // Return the view with the filtered destinations
     return view('admin/admin_destinations', [
         'title' => 'Destinations',
-        'destinations' => $destinations
+        'destinations' => $destinations,
+        'search' => $request->search, // Pass search term back to the view
+        'category' => $request->category, // Pass selected category back to the view
     ]);
 }
 
   /**
      * Display destinations for owner (10 items per page).
      */
-    public function showOwnerDestinations()
+    public function showOwnerDestinations(Request $request)
     {
-        // Fetch destinations for the owner (assuming owner-specific logic)
-        $destinations = Destination::where('user_id', auth()->id()) // Adjust this query as needed
-                                   ->paginate(10); // Fetch 10 items per page
+        // Get the logged-in owner
+        $user = auth()->user();
+
+        // Start the query for approved destinations
+        $query = Destination::where('user_id', $user->id)
+                            ->where('status', 'approved');
+
+        // Handle search
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', '%' . $search . '%')
+                  ->orWhere('destination_name', 'like', '%' . $search . '%')
+                  ->orWhere('destination_address', 'like', '%' . $search . '%')
+                  ->orWhere('locality', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Handle filter by category
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category', $request->category);
+        }
+
+        // Paginate the results
+        $destinations = $query->paginate(10);
 
         // Return the view with the filtered destinations
         return view('owner/destinations', [
-            'title' => 'Destinations',
-            'destinations' => $destinations
+            'title' => 'My Destinations',
+            'destinations' => $destinations,
+            'search' => $request->search, // Pass search term back to the view
+            'category' => $request->category, // Pass selected category back to the view
         ]);
     }
-    
-    public function coverphoto(Request $request, string $id)
-    {
-        $destination = Destination::findOrFail($id);
-        $oldFile = 'images/coverphotos/'.$destination->coverphoto;
-        $fileName = '';
 
-        if ($request->hasFile('coverphoto')) {
-            $fileName = $this->handleFileUpload($request->file('coverphoto'), 'coverphotos');
-            if (File::exists($oldFile)) {
-                File::delete($oldFile);
-            }
+    public function showOwnerApplications(Request $request)
+    {
+        // Get the logged-in owner
+        $user = auth()->user();
+
+        // Start the query for pending and declined destinations
+        $query = Destination::where('user_id', $user->id)
+                            ->whereIn('status', ['pending', 'declined']);
+
+        // Handle search
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', '%' . $search . '%')
+                  ->orWhere('destination_name', 'like', '%' . $search . '%')
+                  ->orWhere('destination_address', 'like', '%' . $search . '%')
+                  ->orWhere('locality', 'like', '%' . $search . '%');
+            });
         }
 
-        $destination->coverphoto = $fileName;
-        $destination->save();
+        // Handle filter by category
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category', $request->category);
+        }
 
-        return redirect()->back();
+        // Paginate the results
+        $applications = $query->paginate(10);
+
+        // Return the view with the filtered applications
+        return view('owner/applications', [
+            'title' => 'My Applications',
+            'applications' => $applications,
+            'search' => $request->search, // Pass search term back to the view
+            'category' => $request->category, // Pass selected category back to the view
+        ]);
     }
-
     /**
      * Update the specified resource in storage.
      */

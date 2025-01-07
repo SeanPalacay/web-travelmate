@@ -162,24 +162,27 @@
                 <div class="col-sm-12 col-md-10 col-lg-10">
                     <!-- Search and Filter -->
                     <div class="search-filter-container mb-3 d-flex gap-2">
-                        <div class="input-group flex-grow-1">
-                            <input type="search" id="searchInput" placeholder="Search..." class="form-control">
-                        </div>
-                        <div class="input-group flex-grow-1">
-                            <select id="filterSelect" class="form-control">
-                                <option value="">All Destinations</option>
-                                <option value="Resort">Resort</option>
-                                <option value="Hotel">Hotel</option>
-                                <option value="Park">Park</option>
-                                <option value="Adventure">Adventure</option>
-                                <option value="Sports">Sports</option>
-                                <option value="Wine & Beer">Wine & Beer</option>
-                                <option value="Restaurant">Restaurant</option>
-                                <option value="Fastfood">Fastfood</option>
-                                <option value="Church">Church</option>
-                                <option value="Art Galleries">Art Galleries</option>
-                            </select>
-                        </div>
+                        <form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+                            <div class="input-group flex-grow-1">
+                                <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+                            </div>
+                            <div class="input-group flex-grow-1">
+                                <select name="category" id="filterSelect" class="form-control">
+                                    <option value="">All Destinations</option>
+                                    <option value="Resort" {{ request('category') == 'Resort' ? 'selected' : '' }}>Resort</option>
+                                    <option value="Hotel" {{ request('category') == 'Hotel' ? 'selected' : '' }}>Hotel</option>
+                                    <option value="Park" {{ request('category') == 'Park' ? 'selected' : '' }}>Park</option>
+                                    <option value="Adventure" {{ request('category') == 'Adventure' ? 'selected' : '' }}>Adventure</option>
+                                    <option value="Sports" {{ request('category') == 'Sports' ? 'selected' : '' }}>Sports</option>
+                                    <option value="Wine & Beer" {{ request('category') == 'Wine & Beer' ? 'selected' : '' }}>Wine & Beer</option>
+                                    <option value="Restaurant" {{ request('category') == 'Restaurant' ? 'selected' : '' }}>Restaurant</option>
+                                    <option value="Fastfood" {{ request('category') == 'Fastfood' ? 'selected' : '' }}>Fastfood</option>
+                                    <option value="Church" {{ request('category') == 'Church' ? 'selected' : '' }}>Church</option>
+                                    <option value="Art Galleries" {{ request('category') == 'Art Galleries' ? 'selected' : '' }}>Art Galleries</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                        </form>
                     </div>
 
                     <!-- Table -->
@@ -231,32 +234,33 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="d-flex justify-content-center mt-4">
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination">
-                                <!-- Previous Button -->
-                                <li class="page-item {{ $destinations->onFirstPage() ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ $destinations->previousPageUrl() }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo; Previous</span>
-                                    </a>
-                                </li>
+                <!-- Pagination -->
+<div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <!-- Previous Button -->
+            <li class="page-item {{ $destinations->onFirstPage() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ $destinations->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo; Previous</span>
+                </a>
+            </li>
 
-                                <!-- Page Numbers -->
-                                @for ($i = 1; $i <= $destinations->lastPage(); $i++)
-                                    <li class="page-item {{ $destinations->currentPage() == $i ? 'active' : '' }}">
-                                        <a class="page-link" href="{{ $destinations->url($i) }}">{{ $i }}</a>
-                                    </li>
-                                @endfor
+            <!-- Page Numbers -->
+            @for ($i = 1; $i <= $destinations->lastPage(); $i++)
+                <li class="page-item {{ $destinations->currentPage() == $i ? 'active' : '' }}">
+                    <a class="page-link" href="{{ $destinations->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                </li>
+            @endfor
 
-                                <!-- Next Button -->
-                                <li class="page-item {{ $destinations->hasMorePages() ? '' : 'disabled' }}">
-                                    <a class="page-link" href="{{ $destinations->nextPageUrl() }}" aria-label="Next">
-                                        <span aria-hidden="true">Next &raquo;</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+            <!-- Next Button -->
+            <li class="page-item {{ $destinations->hasMorePages() ? '' : 'disabled' }}">
+                <a class="page-link" href="{{ $destinations->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
+                    <span aria-hidden="true">Next &raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
 
                     <!-- Pagination Info -->
                     <div class="pagination-info">
@@ -269,7 +273,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    <script>
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('searchInput');
             const filterSelect = document.getElementById('filterSelect');
@@ -312,6 +316,6 @@
             searchInput.addEventListener('input', filterTable);
             filterSelect.addEventListener('change', filterTable);
         });
-    </script>
+    </script> --}}
 </body>
 </html>
