@@ -10,6 +10,19 @@
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <style>
+        .input-group-text:hover {
+    background-color: #0b5ed7;
+}
+
+#togglePassword {
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+#togglePassword:focus {
+    outline: none;
+    box-shadow: none;
+}
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #0b0e1f, #0040ff);
@@ -200,6 +213,9 @@
                         <div class="input-group">
                             <span class="input-group-text"><i class="lni lni-lock"></i></span>
                             <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Enter your password" required>
+                            <button class="input-group-text" type="button" id="togglePassword" style="border-radius: 0 15px 15px 0; cursor: pointer;">
+                                <i class="lni lni-eye" id="toggleIcon"></i>
+                            </button>
                         </div>
                         @error('password')
                             <div class="error-message">{{ $message }}</div>
@@ -212,7 +228,20 @@
             </div>
         </div>
     </div>
-
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+    
+        togglePassword.addEventListener('click', function () {
+            // Toggle the password visibility
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Toggle the eye icon
+            toggleIcon.className = type === 'password' ? 'lni lni-eye' : 'lni lni-eye-off';
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 
