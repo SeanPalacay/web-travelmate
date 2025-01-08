@@ -11,23 +11,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <style>
         .input-group-text:hover {
-    background-color: #0b5ed7;
-}
+            background-color: #0b5ed7;
+        }
 
-#togglePassword {
-    border: none;
-    padding: 0.5rem 1rem;
-}
+        #togglePassword {
+            border: none;
+            padding: 0.5rem 1rem;
+        }
 
-#togglePassword:focus {
-    outline: none;
-    box-shadow: none;
-}
+        #togglePassword:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #0b0e1f, #0040ff);
             height: 100vh;
-            color: white; 
+            color: white;
             overflow: hidden;
         }
 
@@ -120,6 +121,9 @@
             padding: 1rem;
             font-size: 1rem;
             transition: all 0.3s ease;
+            -webkit-appearance: none; /* Remove default browser styling */
+            -moz-appearance: none;
+            appearance: none;
         }
 
         input[type="text"]:focus,
@@ -229,18 +233,24 @@
         </div>
     </div>
     <script>
-        const togglePassword = document.getElementById('togglePassword');
-        const password = document.getElementById('password');
-        const toggleIcon = document.getElementById('toggleIcon');
+     const togglePassword = document.getElementById('togglePassword');
+const password = document.getElementById('password');
+const toggleIcon = document.getElementById('toggleIcon');
+
+togglePassword.addEventListener('click', function () {
+    // Toggle the password visibility
+    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+    password.setAttribute('type', type);
     
-        togglePassword.addEventListener('click', function () {
-            // Toggle the password visibility
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            
-            // Toggle the eye icon
-            toggleIcon.className = type === 'password' ? 'lni lni-eye' : 'lni lni-eye-off';
-        });
+    // Instead of changing the icon, just change its opacity or color to indicate state
+    if (type === 'password') {
+        toggleIcon.className = 'lni lni-eye';
+        toggleIcon.style.opacity = '0.5';
+    } else {
+        toggleIcon.className = 'lni lni-eye';
+        toggleIcon.style.opacity = '1';  // Makes the eye icon appear dimmed when password is visible
+    }
+});
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
