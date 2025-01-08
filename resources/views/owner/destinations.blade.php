@@ -218,7 +218,7 @@
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
                             <a href="/owner/applications/view/{{ $destination->id }}" class="dropdown-item">View</a>
                             <a href="/owner/applications/edit/{{ $destination->id }}" class="dropdown-item">Edit</a>
-                            <a href="/owner/destination/presentation/{{ $destination->id }}" class="dropdown-item">Edit Landing Page</a>
+                            <a href="/owner/destinations/presentation/{{ $destination->id }}" class="dropdown-item">Edit Landing Page</a>
                             <form action="/owner/applications/delete/{{ $destination->id }}" method="POST">
                                 @csrf
                                 @method('DELETE')

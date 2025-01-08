@@ -171,8 +171,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('applications/delete/{application}', [DestinationController::class, 'applicationdestroy']);
         Route::delete('applications/delete/{application}', [DestinationController::class, 'destinationdestroy']);
         Route::get('applications/view/{application}', [DestinationController::class, 'show']);
-        Route::get('destination/presentation/{application}', [DestinationController::class, 'present']);
-        Route::post('destination/coverphoto/{destination}', [DestinationController::class, 'coverphoto']);
+        Route::get('destinations/presentation/{application}', [DestinationController::class, 'present']);
+        Route::post('destinations/coverphoto/{destination}', [DestinationController::class, 'coverphoto']);
         Route::get('applications/edit/{application}', [DestinationController::class, 'edit']);
         Route::put('applications/update/{destination}', [DestinationController::class, 'ownerupdate']);
         Route::post('destination/map/{destination}', [DestinationController::class, 'saveCoordinates']);

@@ -141,7 +141,7 @@
                         <h2 class="data-field">Map</h2>
                         <div id="map" class="map-container" style="border-radius: 25px; margin-top: 25px;" ></div>
 
-                        <form action="{{ url('/owner/destination/map/' . $destination->id) }}" method="POST" class="save-button">
+                        <form action="{{ url('/owner/destinations/map/' . $destination->id) }}" method="POST" class="save-button">
                             @csrf
                             <!-- Hidden inputs for lat and long -->
                             <input type="hidden" id="lat" name="lat" value="{{ $destination->lat }}">
@@ -163,7 +163,7 @@
                     <h1 class="modal-title fs-5" id="corporateBankAccountLabel">Upload new cover photo</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="/owner/destination/coverphoto/{{ $destination->id }}" method="POST" enctype="multipart/form-data">
+                <form action="/owner/destinations/coverphoto/{{ $destination->id }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <input type="file" class="form-control" id="coverphoto" name="coverphoto">

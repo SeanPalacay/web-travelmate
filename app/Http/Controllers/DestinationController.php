@@ -296,7 +296,7 @@ public function showApproved(Request $request)
         $applications = $query->paginate(10);
 
         // Return the view with the filtered applications
-        return view('owner/applications', [
+        return view('owner/my_applications', [
             'title' => 'My Applications',
             'applications' => $applications,
             'search' => $request->search, // Pass search term back to the view
@@ -412,6 +412,40 @@ public function showApproved(Request $request)
 
         return redirect()->back()->with('success', 'Destination deleted successfully!');
     }
+    
+    public function coverphoto(Request $request, string $id)
+{
+    // Validate the incoming request
+    $request->validate([
+        'coverphoto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Adjust validation rules as needed
+    ]);
+
+    // Find the destination by ID
+    $destination = Destination::findOrFail($id);
+
+    // Handle file upload
+    if ($request->hasFile('coverphoto')) {
+        // Delete the old cover photo if it exists
+        if ($destination->coverphoto) {
+            $oldFilePath = public_path('images/coverphotos/' . $destination->coverphoto);
+            if (file_exists($oldFilePath)) {
+                unlink($oldFilePath);
+            }
+        }
+
+        // Upload the new cover photo
+        $file = $request->file('coverphoto');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('images/coverphotos'), $fileName);
+
+        // Update the destination's cover photo field
+        $destination->coverphoto = $fileName;
+        $destination->save();
+    }
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'Cover photo updated successfully!');
+}
 
     public function viewdestroy(string $id)
     {
