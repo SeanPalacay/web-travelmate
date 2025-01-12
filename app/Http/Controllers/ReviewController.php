@@ -9,6 +9,7 @@ use App\Models\Destination;
 use Illuminate\Support\Facades\Log; // Import Log for logging
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
@@ -157,7 +158,47 @@ class ReviewController extends Controller
          ]);
      }
     
-    
+     
+     public function showAdminReviews(Request $request)
+{
+    $adminId = Auth::id();
+
+    // Only reviews whose destination.user_id matches the admin
+    $query = Review::whereHas('destination', function($q) use ($adminId) {
+        $q->where('user_id', $adminId);
+    });
+
+    // Optional: search logic
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('review_title', 'like', "%{$search}%")
+              ->orWhereHas('destination', function($sub) use ($search) {
+                  $sub->where('destination_name', 'like', "%{$search}%")
+                      ->orWhere('company_name', 'like', "%{$search}%");
+              })
+              ->orWhereHas('user', function($sub) use ($search) {
+                  $sub->where('firstname', 'like', "%{$search}%")
+                      ->orWhere('lastname', 'like', "%{$search}%");
+              });
+        });
+    }
+
+    // Optional: rating filter
+    if ($request->filled('rating')) {
+        $query->where('rating', (int)$request->rating);
+    }
+
+    // Sort + paginate
+    $reviews = $query->orderBy('createdAt', 'desc')->paginate(10);
+
+    return view('admin.reviews', [
+        'title'   => 'Reviews',
+        'reviews' => $reviews,
+        'search'  => $request->search,
+        'rating'  => $request->rating,
+    ]);
+}
 
 
     /**

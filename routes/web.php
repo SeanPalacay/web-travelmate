@@ -168,14 +168,18 @@ Route::middleware('auth')->group(function () {
         Route::get('destinations', [DestinationController::class, 'showOwnerDestinations']);
     
         Route::delete('destinations/delete/{application}', [DestinationController::class, 'destroy']);
-        Route::delete('applications/delete/{application}', [DestinationController::class, 'applicationdestroy']);
-        Route::delete('applications/delete/{application}', [DestinationController::class, 'destinationdestroy']);
+// For applications:
+Route::delete('applications/delete/{application}', [DestinationController::class, 'applicationdestroy']);
+
+// For destinations:
+Route::delete('destinations/delete/{destination}', [DestinationController::class, 'destinationdestroy']);
+
         Route::get('applications/view/{application}', [DestinationController::class, 'show']);
         Route::get('destinations/presentation/{application}', [DestinationController::class, 'present']);
         Route::post('destinations/coverphoto/{destination}', [DestinationController::class, 'coverphoto']);
         Route::get('applications/edit/{application}', [DestinationController::class, 'edit']);
         Route::put('applications/update/{destination}', [DestinationController::class, 'ownerupdate']);
-        Route::post('destination/map/{destination}', [DestinationController::class, 'saveCoordinates']);
+        Route::post('destinations/map/{destination}', [DestinationController::class, 'saveCoordinates']);
     
         Route::get('reviews', [ReviewController::class, 'ownerindex']);
     
@@ -184,12 +188,15 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('dashboard', function () {
+
+            $user = auth()->user();
+
             // Get the locality of the logged-in admin
             $adminLocality = auth()->user()->locality;
         
             // Fetch counts filtered by the admin's locality
-            $reviewCount = Review::whereHas('destination', function($query) use ($adminLocality) {
-                $query->where('locality', $adminLocality);
+            $reviewCount = Review::whereHas('destination', function($query) use ($user) {
+                $query->where('user_id', $user->id); // Filter by admin's ID
             })->count();
         
             // Fetch fare count filtered by the admin's locality
@@ -227,6 +234,10 @@ Route::middleware('auth')->group(function () {
             ]);
         });
 
+       // This single route calls the showAdminReviews method
+Route::get('reviews', [ReviewController::class, 'showAdminReviews'])
+->name('admin.reviews');
+
         Route::get('applications', [DestinationController::class, 'showAdminApplications'])->name('admin.applications');
         
 
@@ -241,7 +252,7 @@ Route::middleware('auth')->group(function () {
         Route::post('destination/coverphoto/{destination}', [DestinationController::class, 'coverphoto']);
         Route::post('destination/map/{destination}', [DestinationController::class, 'saveCoordinates']);
 
-        Route::get('reviews', [ReviewController::class, 'adminindex']);
+        // Route::get('reviews', [ReviewController::class, 'adminindex']);
         Route::delete('reviews/delete/{review}', [ReviewController::class, 'destroy']);
         Route::get('fares/create', function () {
             return view('admin/create_fare', ['title' => 'Create a Fare']);
@@ -272,6 +283,6 @@ Route::middleware('auth')->group(function () {
         
 
         Route::patch('reports/approve/{report}', [ReportController::class, 'approve']);
-        Route::patch('12/decline/{report}', [ReportController::class, 'decline']);
+        Route::patch('reports/decline/{report}', [ReportController::class, 'decline']);
     });
 });

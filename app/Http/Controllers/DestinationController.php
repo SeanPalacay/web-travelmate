@@ -474,7 +474,8 @@ public function showApproved(Request $request)
 
         $destination->delete();
 
-        return redirect('/owner/applications')->with('success', 'Application deleted successfully!');
+        return redirect()->back()->with('success', 'Application deleted successfully!');
+
     }
     
     public function destinationdestroy(string $id)
@@ -484,7 +485,7 @@ public function showApproved(Request $request)
 
         $destination->delete();
 
-        return redirect('/owner/destinations')->with('success', 'Destination deleted successfully!');
+        return redirect()->back()->with('success', 'Destination deleted successfully!');
     }
 
     public function decline(string $id)

@@ -44,6 +44,28 @@
             background-color: #f9f9f9;
         }
 
+        /* Status Badges */
+        .badge {
+            padding: 0.5em 0.75em;
+            border-radius: 0.25em;
+            font-size: 0.875rem;
+        }
+
+        .badge.bg-success {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .badge.bg-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
         /* Pagination Styles */
         .pagination {
             display: flex;
@@ -298,7 +320,7 @@
                                                     <h1 class="modal-title fs-4 fw-bold text-dark" id="reportLabel{{ $review->_id }}">Report Review</h1>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
-                                                <form action="/owner/reports/store" method="POST">
+                                                <form id="reportForm-{{ $review->_id }}" action="/owner/reports/store" method="POST">
                                                     @csrf
                                                     <div class="modal-body">
                                                         @if ($errors->any())
@@ -310,26 +332,45 @@
                                                                 </ul>
                                                             </div>
                                                         @endif
-
-                                                        <!-- Hidden Fields -->
                                                         <input type="hidden" value="{{ $review->id }}" name="review_id" id="review_id">
                                                         <input type="hidden" value="{{ $review->destination_id }}" name="destination_id" id="destination_id">
+                                                        <input type="hidden" name="reason" id="reasonHidden-{{ $review->_id }}">
 
-                                                        <!-- Report Reason Options -->
                                                         @php
-                                                        $reportOptions = [
-                                                            ['name' => 'report_reason', 'value' => 'False information', 'label' => 'False information'],
-                                                            ['name' => 'report_reason', 'value' => 'Offensive language', 'label' => 'Offensive language'],
-                                                            ['name' => 'report_reason', 'value' => 'Spam', 'label' => 'Spam'],
-                                                            ['name' => 'report_reason', 'value' => 'Conflict of interest', 'label' => 'Conflict of interest'],
-                                                            ['name' => 'report_reason', 'value' => 'Privacy violation', 'label' => 'Privacy violation'],
-                                                            ['name' => 'report_reason', 'value' => 'Irrelevant content', 'label' => 'Irrelevant content'],
-                                                            ['name' => 'report_reason', 'value' => 'Threats', 'label' => 'Threats']
-                                                        ];
+                                                            // Updated: add 'others' as a separate radio option
+                                                            $reportOptions = [
+                                                                ['name' => 'radio_temp', 'value' => 'False information', 'label' => 'False information'],
+                                                                ['name' => 'radio_temp', 'value' => 'Offensive language', 'label' => 'Offensive language'],
+                                                                ['name' => 'radio_temp', 'value' => 'Spam', 'label' => 'Spam'],
+                                                                ['name' => 'radio_temp', 'value' => 'Conflict of interest', 'label' => 'Conflict of interest'],
+                                                                ['name' => 'radio_temp', 'value' => 'Privacy violation', 'label' => 'Privacy violation'],
+                                                                ['name' => 'radio_temp', 'value' => 'Irrelevant content', 'label' => 'Irrelevant content'],
+                                                                ['name' => 'radio_temp', 'value' => 'Threats', 'label' => 'Threats'],
+                                                                ['name' => 'radio_temp', 'value' => 'others', 'label' => 'Others (please specify)'],
+                                                            ];
                                                         @endphp
 
-                                                        <x-input-radio :options="$reportOptions" name="reason" class="mb-3" />
-                                                        <x-textarea-field label="Others" name="others" id="others" class="mt-3" />
+                                                        @foreach($reportOptions as $option)
+                                                            <div class="form-check mb-2">
+                                                                <input class="form-check-input"
+                                                                       type="radio"
+                                                                       name="radio_temp"
+                                                                       id="report_{{ $option['value'] }}_{{ $review->_id }}"
+                                                                       value="{{ $option['value'] }}">
+                                                                <label class="form-check-label" for="report_{{ $option['value'] }}_{{ $review->_id }}">
+                                                                    {{ $option['label'] }}
+                                                                </label>
+                                                            </div>
+                                                        @endforeach
+
+                                                        <label for="others-{{ $review->_id }}" class="mt-3 fw-bold">Explain:</label>
+                                                        <!-- Disabled by default; only required if "others" is chosen -->
+                                                        <textarea class="form-control mt-1"
+                                                                  name="others"
+                                                                  id="others-{{ $review->_id }}"
+                                                                  placeholder="Specify your reason here..."
+                                                                  rows="3"
+                                                                  disabled></textarea>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button class="btn btn-primary w-100 fw-bold" type="submit">Submit Report</button>
@@ -383,6 +424,60 @@
             </div>
         </div>
     </div>
+
+    <!-- JavaScript logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @foreach($reviews as $review)
+            (function() {
+                const form = document.getElementById('reportForm-{{ $review->_id }}');
+                const reasonHidden = document.getElementById('reasonHidden-{{ $review->_id }}');
+                const radioButtons = form.querySelectorAll('input[name="radio_temp"]');
+                const othersField = document.getElementById('others-{{ $review->_id }}');
+
+                // Listen for changes on all radio buttons
+                radioButtons.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        if (radio.value === 'others' && radio.checked) {
+                            // Enable + require the textarea
+                            othersField.disabled = false;
+                            othersField.required = true;
+                        } else {
+                            // Disable + not required + clear if any other radio is chosen
+                            othersField.disabled = true;
+                            othersField.required = false;
+                            othersField.value = '';
+                        }
+                    });
+                });
+
+                // On form submit, set the hidden "reason" input
+                form.addEventListener('submit', function(e) {
+                    // find which radio is checked
+                    let selectedRadio = Array.from(radioButtons).find(r => r.checked);
+
+                    if (selectedRadio) {
+                        // if "others," reason = the text area
+                        if (selectedRadio.value === 'others') {
+                            reasonHidden.value = othersField.value.trim();
+                        } else {
+                            // otherwise, reason = radio's value
+                            reasonHidden.value = selectedRadio.value;
+                        }
+                    } else {
+                        // If no radio is selected, see if user typed in the text area
+                        let othersText = othersField.value.trim();
+                        if (othersText.length > 0) {
+                            reasonHidden.value = othersText;
+                        }
+                        // else let server handle validation
+                    }
+                });
+            })();
+            @endforeach
+        });
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>

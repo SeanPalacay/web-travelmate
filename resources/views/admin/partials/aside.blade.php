@@ -110,10 +110,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>   /* Ensure the body has a left margin equal to the sidebar width */
-    body {
+  .main {
         margin-left: 260px; /* Matches the sidebar width */
-        transition: margin-left 0.5s ease; /* Smooth transition for sidebar toggle */
+        transition: margin-left 0.5s ease;
     }
+
 
     /* Adjust for smaller screens */
     @media (max-width: 768px) {
