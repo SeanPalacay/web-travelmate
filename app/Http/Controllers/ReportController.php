@@ -84,10 +84,10 @@ class ReportController extends Controller
         // Grab the radio choice & others text
         $radioChoice = $request->input('radio_temp'); // e.g. "Offensive language" or "others"
         $othersText  = trim($request->input('others', '')); // might be empty if user didn't type
-
+    
         $review_id       = $request->input('review_id');
         $destination_id  = $request->input('destination_id');
-
+    
         // 1) Basic checks for existing fields
         $request->validate([
             'review_id'       => 'required|exists:reviews,_id',
@@ -95,7 +95,7 @@ class ReportController extends Controller
             'radio_temp'      => 'nullable|string', // Let us handle logic below
             'others'          => 'nullable|string', // Only required if user picked "others"
         ]);
-
+    
         // 2) If they picked a standard radio
         if ($radioChoice && $radioChoice !== 'others') {
             // No further text required
@@ -104,28 +104,41 @@ class ReportController extends Controller
                 'radio_temp' => 'required', 
             ]);
             $finalReason = $radioChoice;
-
+    
         // 3) If they picked "others," we require text
         } elseif ($radioChoice === 'others') {
             $request->validate([
                 'others' => 'required|min:5', // e.g. must have at least 5 chars
             ]);
             $finalReason = $othersText;
-
+    
         // 4) If no radio was chosen and text is blank -> error
         } else {
-            return back()->withErrors(['radio_temp' => 'Please select a reason.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select a reason.',
+            ], 422); // 422 is the HTTP status code for validation errors
         }
-
+    
         // 5) Create the new report
-        Report::create([
-            'review_id'       => $review_id,
-            'destination_id'  => $destination_id,
-            'reason'          => $finalReason,
-            'status'          => 'pending',
-        ]);
-
-        return redirect()->back()->with('success', 'Report awaiting action from admin');
+        try {
+            Report::create([
+                'review_id'       => $review_id,
+                'destination_id'  => $destination_id,
+                'reason'          => $finalReason,
+                'status'          => 'pending',
+            ]);
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Report submitted successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit report. Please try again.',
+            ], 500); // 500 is the HTTP status code for server errors
+        }
     }
 
     /**

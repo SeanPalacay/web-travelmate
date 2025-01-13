@@ -11,17 +11,16 @@
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <style>
-
         /* Custom tooltip styling */
-.tooltip-inner {
-    font-size: 0.875rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-}
+        .tooltip-inner {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
 
-.tooltip.bs-tooltip-end .tooltip-arrow::before {
-    border-right-color: red; /* Default color for the arrow */
-}
+        .tooltip.bs-tooltip-end .tooltip-arrow::before {
+            border-right-color: red; /* Default color for the arrow */
+        }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -175,17 +174,14 @@
         @media (max-width: 768px) {
             .left-content h1 {
                 font-size: 5rem;
-                /* Adjusted size for smaller screens */
             }
 
             .left-content p {
                 font-size: 1.2rem;
-                /* Adjusted size for smaller screens */
             }
 
             .card {
                 max-width: 100%;
-                /* Ensure form takes full width */
             }
         }
     </style>
@@ -284,19 +280,15 @@
                         <label for="mobile_no" class="form-label">Mobile No</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="lni lni-phone"></i></span>
-                            <input type="text" 
-                                   class="form-control @error('mobile_no') is-invalid @enderror"
-                                   id="mobile_no" 
-                                   name="mobile_no" 
-                                   placeholder="+639XXXXXXXXX"
-                                   maxlength="13"
-                                   value="{{ old('mobile_no', '+639') }}">
+                            <input type="text" class="form-control @error('mobile_no') is-invalid @enderror"
+                                id="mobile_no" name="mobile_no" placeholder="+639XXXXXXXXX" maxlength="13"
+                                value="{{ old('mobile_no', '+639') }}">
                             @error('mobile_no')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
-                        
+
                     <!-- Birthdate -->
                     <div class="col-md-6">
                         <label for="birthdate" class="form-label">Birthdate</label>
@@ -310,23 +302,22 @@
                         </div>
                     </div>
 
-
-<!-- Password -->
-<div class="col-md-6">
-    <label for="password" class="form-label">Password</label>
-    <div class="input-group">
-        <span class="input-group-text"><i class="lni lni-lock"></i></span>
-        <input type="password" class="form-control @error('password') is-invalid @enderror"
-            id="password" name="password" placeholder="Password" value="{{ old('password') }}"
-            data-bs-toggle="tooltip" data-bs-placement="right">
-        <span class="input-group-text" id="togglePassword">
-            <i class="lni lni-eye" id="togglePasswordIcon"></i>
-        </span>
-        @error('password')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-</div>
+                    <!-- Password -->
+                    <div class="col-md-6">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="lni lni-lock"></i></span>
+                            <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                id="password" name="password" placeholder="Password" value="{{ old('password') }}">
+                            <span class="input-group-text" id="togglePassword">
+                                <i class="lni lni-eye" id="togglePasswordIcon"></i>
+                            </span>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div id="password-feedback" class="invalid-feedback"></div>
+                    </div>
 
                     <!-- Confirm Password -->
                     <div class="col-md-6">
@@ -351,8 +342,7 @@
                         <button class="btn btn-custom">Register</button>
                     </div>
                 </form>
-                <p class="text-center mt-3">Already have an account? <a href="/" class="text-primary">Log in here</a>
-                </p>
+                <p class="text-center mt-3">Already have an account? <a href="/" class="text-primary">Log in here</a></p>
             </div>
         </div>
     </div>
@@ -362,277 +352,92 @@
         crossorigin="anonymous"></script>
 
     <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Initialize Bootstrap tooltip
-    const passwordInput = document.getElementById('password');
-    const passwordTooltip = new bootstrap.Tooltip(passwordInput, {
-        placement: 'right', // Position the tooltip to the right of the input
-        trigger: 'manual', // Manually control tooltip visibility
-    });
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('password');
+            const passwordFeedback = document.getElementById('password-feedback');
 
-    // Variable to track the current tooltip state
-    let isTooltipVisible = false;
+            // Function to validate password
+            function validatePassword(password) {
+                const minLength = 8;
+                const hasUppercase = /[A-Z]/.test(password);
+                const hasLowercase = /[a-z]/.test(password);
+                const hasNumber = /[0-9]/.test(password);
+                const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-    // Password strength validation
-    passwordInput.addEventListener('input', function (e) {
-        const password = e.target.value;
-
-        // Define password strength rules
-        const minLength = 8;
-        const hasUppercase = /[A-Z]/.test(password);
-        const hasLowercase = /[a-z]/.test(password);
-        const hasNumber = /[0-9]/.test(password);
-        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-        // Check password strength
-        let strength = 0;
-        if (password.length >= minLength) strength++;
-        if (hasUppercase) strength++;
-        if (hasLowercase) strength++;
-        if (hasNumber) strength++;
-        if (hasSpecialChar) strength++;
-
-        // Set tooltip content and style based on strength
-        let tooltipMessage = '';
-        let tooltipColor = '';
-        if (strength === 0) {
-            tooltipMessage = '';
-            if (isTooltipVisible) {
-                passwordTooltip.hide(); // Hide tooltip if no input
-                isTooltipVisible = false;
-            }
-        } else if (strength <= 2) {
-            tooltipMessage = 'Weak password. Include uppercase, lowercase, numbers, and special characters.';
-            tooltipColor = 'red';
-        } else if (strength <= 4) {
-            tooltipMessage = 'Moderate password. Almost there!';
-            tooltipColor = 'orange';
-        } else {
-            tooltipMessage = 'Strong password!';
-            tooltipColor = 'green';
-        }
-
-        // Update tooltip content and style only if the message has changed
-        if (passwordInput.getAttribute('data-bs-original-title') !== tooltipMessage) {
-            passwordInput.setAttribute('data-bs-original-title', tooltipMessage);
-            passwordTooltip.update(); // Update the tooltip content
-
-            // Show the tooltip if it's not already visible
-            if (!isTooltipVisible && tooltipMessage) {
-                passwordTooltip.show();
-                isTooltipVisible = true;
+                if (password.length < minLength) {
+                    return 'Password must be at least 8 characters long.';
+                }
+                if (!hasUppercase) {
+                    return 'Password must include at least one uppercase letter.';
+                }
+                if (!hasLowercase) {
+                    return 'Password must include at least one lowercase letter.';
+                }
+                if (!hasNumber) {
+                    return 'Password must include at least one number.';
+                }
+                if (!hasSpecialChar) {
+                    return 'Password must include at least one special character.';
+                }
+                return null; // No error
             }
 
-            // Change tooltip color dynamically
-            const tooltipInner = document.querySelector('.tooltip-inner');
-            if (tooltipInner) {
-                tooltipInner.style.backgroundColor = tooltipColor;
-            }
-        }
-    });
+            // Validate password on input
+            passwordInput.addEventListener('input', function (e) {
+                const password = e.target.value;
+                const errorMessage = validatePassword(password);
 
-    // Hide tooltip when input loses focus
-    passwordInput.addEventListener('blur', function () {
-        if (isTooltipVisible) {
-            passwordTooltip.hide();
-            isTooltipVisible = false;
-        }
-    });
+                if (errorMessage) {
+                    passwordFeedback.textContent = errorMessage;
+                    passwordInput.classList.add('is-invalid');
+                } else {
+                    passwordFeedback.textContent = '';
+                    passwordInput.classList.remove('is-invalid');
+                }
+            });
 
-    // Show tooltip when input gains focus (if there's content)
-    passwordInput.addEventListener('focus', function () {
-        if (passwordInput.value && !isTooltipVisible) {
-            passwordTooltip.show();
-            isTooltipVisible = true;
-        }
-    });
-});
- document.addEventListener('DOMContentLoaded', function() {
-    const mobileNoInput = document.getElementById('mobile_no');
+            // Prevent form submission if password is invalid
+            document.querySelector('form').addEventListener('submit', function (e) {
+                const password = passwordInput.value;
+                const errorMessage = validatePassword(password);
 
-    // Set initial value if empty
-    if (!mobileNoInput.value) {
-        mobileNoInput.value = '+639';
-    }
+                if (errorMessage) {
+                    e.preventDefault(); // Prevent form submission
+                    passwordFeedback.textContent = errorMessage;
+                    passwordInput.classList.add('is-invalid');
+                }
+            });
 
-    // Handle input events
-    mobileNoInput.addEventListener('input', function(e) {
-        let value = e.target.value;
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            const togglePasswordIcon = document.getElementById('togglePasswordIcon');
 
-        // Remove any non-numeric characters except +
-        value = value.replace(/[^\d+]/g, '');
+            togglePassword.addEventListener('click', function () {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePasswordIcon.style.opacity = type === 'password' ? '0.5' : '1';
+            });
 
-        // If completely empty, reset to +639
-        if (value === '' || value === '+') {
-            e.target.value = '+639';
-            return;
-        }
+            // Toggle confirm password visibility
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            const confirmPassword = document.getElementById('password_confirmation');
+            const toggleConfirmPasswordIcon = document.getElementById('toggleConfirmPasswordIcon');
 
-        // If backspacing before +639, reset to +639
-        if (value.length < 4) {
-            e.target.value = '+639';
-            return;
-        }
+            toggleConfirmPassword.addEventListener('click', function () {
+                const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmPassword.setAttribute('type', type);
+                toggleConfirmPasswordIcon.style.opacity = type === 'password' ? '0.5' : '1';
+            });
 
-        // Ensure the +639 prefix
-        if (!value.startsWith('+639')) {
-            // Remove any existing +639 prefix
-            value = value.replace(/^\+639/, '');
-            
-            // Remove any leading zeros or +
-            value = value.replace(/^[0+]+/, '');
-
-            // Add the +639 prefix
-            value = '+639' + value;
-        }
-
-        // Limit the total length to 13 characters (+639 + 9 digits)
-        if (value.length > 13) {
-            value = value.slice(0, 13);
-        }
-
-        e.target.value = value;
-    });
-
-    // Handle focus event
-    mobileNoInput.addEventListener('focus', function(e) {
-        if (!e.target.value || e.target.value.length < 4) {
-            e.target.value = '+639';
-            // Place cursor at the end
-            this.selectionStart = this.selectionEnd = this.value.length;
-        }
-    });
-
-    // Handle blur (losing focus) event
-    mobileNoInput.addEventListener('blur', function(e) {
-        let value = e.target.value;
-        
-        // If only +639 is entered, it's considered empty
-        if (value === '+639') {
-            // You can either keep +639 or clear it based on your requirement
-            e.target.value = '+639'; // or e.target.value = ''; if you want to clear it
-        }
-    });
-
-    // Handle paste event
-    mobileNoInput.addEventListener('paste', function(e) {
-        e.preventDefault();
-        let pastedText = (e.clipboardData || window.clipboardData).getData('text');
-        
-        // Remove all non-numeric characters
-        pastedText = pastedText.replace(/\D/g, '');
-        
-        // Remove leading zeros
-        pastedText = pastedText.replace(/^0+/, '');
-
-        // Format the number
-        if (pastedText) {
-            // Take only up to 9 digits
-            pastedText = pastedText.slice(-9);
-            this.value = '+639' + pastedText;
-        }
-    });
-
-    // Handle keydown event
-    mobileNoInput.addEventListener('keydown', function(e) {
-        const currentValue = this.value;
-        const selectionStart = this.selectionStart;
-        
-        // Prevent deleting the +639 prefix
-        if ((e.key === 'Backspace' || e.key === 'Delete') && 
-            (currentValue.length <= 4 || 
-             (selectionStart <= 4 && selectionStart >= 0))) {
-            e.preventDefault();
-            return;
-        }
-
-        // Allow: backspace, delete, tab, escape, enter, numbers
-        if ([46, 8, 9, 27, 13, 110].indexOf(e.keyCode) !== -1 ||
-            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-            (e.keyCode === 65 && (e.ctrlKey || e.metaKey)) ||
-            (e.keyCode === 67 && (e.ctrlKey || e.metaKey)) ||
-            (e.keyCode === 86 && (e.ctrlKey || e.metaKey)) ||
-            (e.keyCode === 88 && (e.ctrlKey || e.metaKey)) ||
-            // Allow: home, end, left, right
-            (e.keyCode >= 35 && e.keyCode <= 39) ||
-            // Allow: numbers
-            ((e.keyCode >= 48 && e.keyCode <= 57) || 
-             (e.keyCode >= 96 && e.keyCode <= 105))) {
-            return;
-        }
-
-        // Block any other input
-        e.preventDefault();
-    });
-});
-
-document.querySelector('form').addEventListener('submit', function (e) {
-    const password = document.getElementById('password').value;
-    const feedback = document.getElementById('password-strength-feedback');
-
-    // Define password strength rules
-    const minLength = 8;
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasLowercase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    // Check if all rules are met
-    if (password.length < minLength || !hasUppercase || !hasLowercase || !hasNumber || !hasSpecialChar) {
-        e.preventDefault(); // Prevent form submission
-        feedback.textContent = 'Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.';
-        feedback.style.color = 'red';
-    }
-});
-        // Toggle password visibility for the password field
-        const togglePassword = document.getElementById('togglePassword');
-        const password = document.getElementById('password');
-        const togglePasswordIcon = document.getElementById('togglePasswordIcon');
-
-        togglePassword.addEventListener('click', function () {
-            // Toggle the password visibility
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-
-            // Change the icon opacity to indicate state
-            if (type === 'password') {
-                togglePasswordIcon.style.opacity = '0.5'; // Fully opaque when password is hidden
-            } else {
-                togglePasswordIcon.style.opacity = '1'; // Dimmed when password is visible
-            }
-        });
-
-        // Toggle password visibility for the confirm password field
-        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-        const confirmPassword = document.getElementById('password_confirmation');
-        const toggleConfirmPasswordIcon = document.getElementById('toggleConfirmPasswordIcon');
-
-        toggleConfirmPassword.addEventListener('click', function () {
-            // Toggle the confirm password visibility
-            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPassword.setAttribute('type', type);
-
-            // Change the icon opacity to indicate state
-            if (type === 'password') {
-                toggleConfirmPasswordIcon.style.opacity = '0.5'; // Fully opaque when password is hidden
-            } else {
-                toggleConfirmPasswordIcon.style.opacity = '1'; // Dimmed when password is visible
-            }
-        });
-
-        // Format locality input
-        document.getElementById('locality').addEventListener('blur', function (e) {
-            let locality = e.target.value.trim();
-
-            // Capitalize the first letter of each word
-            locality = locality.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-
-            // Append "City" if it doesn't already include it
-            if (!locality.toLowerCase().includes('city')) {
-                locality += ' City';
-            }
-
-            e.target.value = locality;
+            // Format locality input
+            document.getElementById('locality').addEventListener('blur', function (e) {
+                let locality = e.target.value.trim();
+                locality = locality.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+                if (!locality.toLowerCase().includes('city')) {
+                    locality += ' City';
+                }
+                e.target.value = locality;
+            });
         });
     </script>
 </body>

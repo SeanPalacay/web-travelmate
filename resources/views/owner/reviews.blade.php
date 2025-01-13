@@ -350,27 +350,25 @@
                                                             ];
                                                         @endphp
 
-                                                        @foreach($reportOptions as $option)
-                                                            <div class="form-check mb-2">
-                                                                <input class="form-check-input"
-                                                                       type="radio"
-                                                                       name="radio_temp"
-                                                                       id="report_{{ $option['value'] }}_{{ $review->_id }}"
-                                                                       value="{{ $option['value'] }}">
-                                                                <label class="form-check-label" for="report_{{ $option['value'] }}_{{ $review->_id }}">
-                                                                    {{ $option['label'] }}
-                                                                </label>
-                                                            </div>
-                                                        @endforeach
+@foreach($reportOptions as $option)
+    <div class="form-check mb-2">
+        <input class="form-check-input"
+               type="radio"
+               name="radio_temp"
+               id="report_{{ $option['value'] }}_{{ $review->_id }}"
+               value="{{ $option['value'] }}">
+        <label class="form-check-label" for="report_{{ $option['value'] }}_{{ $review->_id }}">
+            {{ $option['label'] }}
+        </label>
+    </div>
+@endforeach
 
-                                                        <label for="others-{{ $review->_id }}" class="mt-3 fw-bold">Explain:</label>
-                                                        <!-- Disabled by default; only required if "others" is chosen -->
-                                                        <textarea class="form-control mt-1"
-                                                                  name="others"
-                                                                  id="others-{{ $review->_id }}"
-                                                                  placeholder="Specify your reason here..."
-                                                                  rows="3"
-                                                                  disabled></textarea>
+<label for="others-{{ $review->_id }}" class="mt-3 fw-bold">Explain:</label>
+<textarea class="form-control mt-1"
+          name="others"
+          id="others-{{ $review->_id }}"
+          placeholder="Specify your reason here..."
+          rows="3"></textarea>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button class="btn btn-primary w-100 fw-bold" type="submit">Submit Report</button>
@@ -427,55 +425,93 @@
 
     <!-- JavaScript logic -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @foreach($reviews as $review)
-            (function() {
-                const form = document.getElementById('reportForm-{{ $review->_id }}');
-                const reasonHidden = document.getElementById('reasonHidden-{{ $review->_id }}');
-                const radioButtons = form.querySelectorAll('input[name="radio_temp"]');
-                const othersField = document.getElementById('others-{{ $review->_id }}');
+document.addEventListener('DOMContentLoaded', function() {
+    @foreach($reviews as $review)
+    (function() {
+        const form = document.getElementById('reportForm-{{ $review->_id }}');
+        const reasonHidden = document.getElementById('reasonHidden-{{ $review->_id }}');
+        const radioButtons = form.querySelectorAll('input[name="radio_temp"]');
+        const othersField = document.getElementById('others-{{ $review->_id }}');
+        const othersRadio = document.getElementById('report_others_{{ $review->_id }}');
+        const reportModal = document.getElementById('reportModal{{ $review->_id }}');
 
-                // Listen for changes on all radio buttons
-                radioButtons.forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        if (radio.value === 'others' && radio.checked) {
-                            // Enable + require the textarea
-                            othersField.disabled = false;
-                            othersField.required = true;
-                        } else {
-                            // Disable + not required + clear if any other radio is chosen
-                            othersField.disabled = true;
-                            othersField.required = false;
-                            othersField.value = '';
-                        }
-                    });
-                });
-
-                // On form submit, set the hidden "reason" input
-                form.addEventListener('submit', function(e) {
-                    // find which radio is checked
-                    let selectedRadio = Array.from(radioButtons).find(r => r.checked);
-
-                    if (selectedRadio) {
-                        // if "others," reason = the text area
-                        if (selectedRadio.value === 'others') {
-                            reasonHidden.value = othersField.value.trim();
-                        } else {
-                            // otherwise, reason = radio's value
-                            reasonHidden.value = selectedRadio.value;
-                        }
-                    } else {
-                        // If no radio is selected, see if user typed in the text area
-                        let othersText = othersField.value.trim();
-                        if (othersText.length > 0) {
-                            reasonHidden.value = othersText;
-                        }
-                        // else let server handle validation
-                    }
-                });
-            })();
-            @endforeach
+        // Listen for input in the textarea
+        othersField.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                othersRadio.checked = true; // Automatically select "Others" if text is entered
+            }
         });
+
+        // On form submit, set the hidden "reason" input
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            // Find which radio is checked
+            let selectedRadio = Array.from(radioButtons).find(r => r.checked);
+
+            if (selectedRadio) {
+                // If "others," reason = the text area
+                if (selectedRadio.value === 'others') {
+                    reasonHidden.value = othersField.value.trim();
+                } else {
+                    // Otherwise, reason = radio's value
+                    reasonHidden.value = selectedRadio.value;
+                }
+            } else {
+                // If no radio is selected, see if user typed in the text area
+                let othersText = othersField.value.trim();
+                if (othersText.length > 0) {
+                    reasonHidden.value = othersText;
+                }
+                // Else let server handle validation
+            }
+
+            // Submit the form via AJAX
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}', // Add CSRF token
+                    'Accept': 'application/json', // Ensure the response is JSON
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message || 'Report submitted successfully.',
+                        confirmButtonText: 'OK',
+                    }).then(() => {
+                        // Close the modal after success
+                        const modal = bootstrap.Modal.getInstance(reportModal);
+                        modal.hide();
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message || 'Failed to submit report. Please try again.',
+                        confirmButtonText: 'OK',
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'An error occurred while submitting the report. Please try again.',
+                    confirmButtonText: 'OK',
+                });
+            });
+        });
+    })();
+    @endforeach
+});
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"

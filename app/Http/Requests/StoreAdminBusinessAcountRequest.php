@@ -18,18 +18,17 @@ class StoreAdminBusinessAcountRequest extends FormRequest
             'lastname' => 'required|string|min:2|max:20',
             'birthdate' => ['required', 'date', 'before:' . now()->subYears(11)->toDateString()],
             'email' => 'required|email|unique:users,email,' . $this->route('id'),
-            'password' => 'required|min:4|max:8',
+            'password' => 'required|min:8|max:255', // Updated to allow longer passwords
             'mobile_no' => ['required', 'regex:/^\+639\d{9}$/', 'unique:users'],
             'business_name' => 'nullable|string|min:2|max:20',
             'type' => 'required',
             'locality' => 'nullable|string', // Set locality to a nullable string
         ];
-        
 
         if ($this->isMethod('post')) {
-            $rules['password'] = 'required|min:4|max:8|confirmed';
+            $rules['password'] = 'required|min:8|max:255|confirmed'; // Updated for POST requests
         } elseif ($this->isMethod('put') || $this->isMethod('patch')) {
-            $rules['password'] = 'nullable|min:4|max:8|confirmed';
+            $rules['password'] = 'nullable|min:8|max:255|confirmed'; // Updated for PUT/PATCH requests
         }
 
         return $rules;

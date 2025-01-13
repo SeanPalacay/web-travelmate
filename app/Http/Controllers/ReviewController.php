@@ -95,68 +95,68 @@ class ReviewController extends Controller
     
     
 
-     public function adminindex(Request $request)
-     {
-         // Get the locality of the logged-in admin
-         $adminLocality = $request->user()->locality;
+    //  public function adminindex(Request $request)
+    //  {
+    //      // Get the locality of the logged-in admin
+    //      $adminLocality = $request->user()->locality;
      
-         // Start the query with reviews for destinations in the admin's locality
-         $query = Review::whereHas('destination', function ($query) use ($adminLocality) {
-             $query->where('locality', $adminLocality);
-         });
+    //      // Start the query with reviews for destinations in the admin's locality
+    //      $query = Review::whereHas('destination', function ($query) use ($adminLocality) {
+    //          $query->where('locality', $adminLocality);
+    //      });
      
-         // Handle search
-         if ($request->has('search') && $request->search != '') {
-             $query->where(function ($q) use ($request) {
-                 $q->where('review_title', 'like', '%' . $request->search . '%')
-                   ->orWhereHas('destination', function($q) use ($request) {
-                       $q->where('company_name', 'like', '%' . $request->search . '%')
-                         ->orWhere('destination_name', 'like', '%' . $request->search . '%');
-                   })
-                   ->orWhereHas('user', function($q) use ($request) {
-                       $q->where('firstname', 'like', '%' . $request->search . '%')
-                         ->orWhere('lastname', 'like', '%' . $request->search . '%');
-                   });
-             });
-         }
+    //      // Handle search
+    //      if ($request->has('search') && $request->search != '') {
+    //          $query->where(function ($q) use ($request) {
+    //              $q->where('review_title', 'like', '%' . $request->search . '%')
+    //                ->orWhereHas('destination', function($q) use ($request) {
+    //                    $q->where('company_name', 'like', '%' . $request->search . '%')
+    //                      ->orWhere('destination_name', 'like', '%' . $request->search . '%');
+    //                })
+    //                ->orWhereHas('user', function($q) use ($request) {
+    //                    $q->where('firstname', 'like', '%' . $request->search . '%')
+    //                      ->orWhere('lastname', 'like', '%' . $request->search . '%');
+    //                });
+    //          });
+    //      }
      
-         // Handle filter by rating
-         if ($request->has('rating') && $request->rating != '') {
-             $query->where('rating', (int) $request->rating);
-         }
+    //      // Handle filter by rating
+    //      if ($request->has('rating') && $request->rating != '') {
+    //          $query->where('rating', (int) $request->rating);
+    //      }
      
-         // Handle filter by status
-         if ($request->has('status') && $request->status != '') {
-             $query->where('status', $request->status);
-         }
+    //      // Handle filter by status
+    //      if ($request->has('status') && $request->status != '') {
+    //          $query->where('status', $request->status);
+    //      }
      
-         // Debugging: Check the query and results
-         // dd($query->toSql(), $query->getBindings(), $query->get());
+    //      // Debugging: Check the query and results
+    //      // dd($query->toSql(), $query->getBindings(), $query->get());
      
-         // Paginate the results
-         $reviews = $query->orderBy('createdAt', 'desc')->paginate(10);
+    //      // Paginate the results
+    //      $reviews = $query->orderBy('createdAt', 'desc')->paginate(10);
      
-         // Convert createdAt to Asia/Manila timezone for each review and change the format
-         foreach ($reviews as $review) {
-             if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
-                 // Convert MongoDB\BSON\UTCDateTime to Carbon instance
-                 $dateTime = $review->createdAt->toDateTime();
+    //      // Convert createdAt to Asia/Manila timezone for each review and change the format
+    //      foreach ($reviews as $review) {
+    //          if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
+    //              // Convert MongoDB\BSON\UTCDateTime to Carbon instance
+    //              $dateTime = $review->createdAt->toDateTime();
      
-                 $review->formatted_created_at = Carbon::parse($dateTime)
-                     ->setTimezone('Asia/Manila')
-                     ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
-             }
-         }
+    //              $review->formatted_created_at = Carbon::parse($dateTime)
+    //                  ->setTimezone('Asia/Manila')
+    //                  ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
+    //          }
+    //      }
      
-         // Return the view with the filtered reviews
-         return view('admin/reviews', [
-             'title' => 'Reviews',
-             'reviews' => $reviews,
-             'search' => $request->search,
-             'rating' => $request->rating,
-             'status' => $request->status,
-         ]);
-     }
+    //      // Return the view with the filtered reviews
+    //      return view('admin/reviews', [
+    //          'title' => 'Reviews',
+    //          'reviews' => $reviews,
+    //          'search' => $request->search,
+    //          'rating' => $request->rating,
+    //          'status' => $request->status,
+    //      ]);
+    //  }
     
      
      public function showAdminReviews(Request $request)
@@ -192,6 +192,17 @@ class ReviewController extends Controller
     // Sort + paginate
     $reviews = $query->orderBy('createdAt', 'desc')->paginate(10);
 
+    foreach ($reviews as $review) {
+        if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
+            // Convert MongoDB\BSON\UTCDateTime to Carbon instance
+            $dateTime = $review->createdAt->toDateTime();
+
+            $review->formatted_created_at = Carbon::parse($dateTime)
+                ->setTimezone('Asia/Manila')
+                ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
+        }
+    }
+    
     return view('admin.reviews', [
         'title'   => 'Reviews',
         'reviews' => $reviews,

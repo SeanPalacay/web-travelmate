@@ -41,7 +41,7 @@ class StoreDestinationRequest extends FormRequest
             'nearest_landmark1' => 'nullable|string|max:255',
             'nearest_landmark2' => 'nullable|string|max:255',
             'nearest_landmark3' => 'nullable|string|max:255',
-            'amenities' => 'nullable|string|max:1000',
+            'amenities' => 'required|string|max:1000',
             'status' => 'required|in:pending,approved,rejected',
             'user_id' => 'required',
         ];
