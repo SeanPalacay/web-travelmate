@@ -11,6 +11,7 @@
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <style>
+
         /* Custom tooltip styling */
         .tooltip-inner {
             font-size: 0.875rem;
@@ -161,14 +162,18 @@
         }
 
         /* Error message styling */
-        .is-invalid {
-            border-color: #dc3545;
-        }
+      /* Enhanced error message styling */
+.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+}
 
-        .invalid-feedback {
-            color: #dc3545;
-            font-size: 0.875rem;
-        }
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block; /* Ensure it's always visible */
+}
 
         /* Responsive improvements */
         @media (max-width: 768px) {
@@ -353,92 +358,92 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const passwordInput = document.getElementById('password');
-            const passwordFeedback = document.getElementById('password-feedback');
+    const passwordInput = document.getElementById('password');
+    const passwordFeedback = document.getElementById('password-feedback');
 
-            // Function to validate password
-            function validatePassword(password) {
-                const minLength = 8;
-                const hasUppercase = /[A-Z]/.test(password);
-                const hasLowercase = /[a-z]/.test(password);
-                const hasNumber = /[0-9]/.test(password);
-                const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    // Function to validate password
+    function validatePassword(password) {
+        const minLength = 8;
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasLowercase = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-                if (password.length < minLength) {
-                    return 'Password must be at least 8 characters long.';
-                }
-                if (!hasUppercase) {
-                    return 'Password must include at least one uppercase letter.';
-                }
-                if (!hasLowercase) {
-                    return 'Password must include at least one lowercase letter.';
-                }
-                if (!hasNumber) {
-                    return 'Password must include at least one number.';
-                }
-                if (!hasSpecialChar) {
-                    return 'Password must include at least one special character.';
-                }
-                return null; // No error
-            }
+        if (password.length < minLength) {
+            return 'Password must be at least 8 characters long.';
+        }
+        if (!hasUppercase) {
+            return 'Password must include at least one uppercase letter.';
+        }
+        if (!hasLowercase) {
+            return 'Password must include at least one lowercase letter.';
+        }
+        if (!hasNumber) {
+            return 'Password must include at least one number.';
+        }
+        if (!hasSpecialChar) {
+            return 'Password must include at least one special character.';
+        }
+        return null; // No error
+    }
 
-            // Validate password on input
-            passwordInput.addEventListener('input', function (e) {
-                const password = e.target.value;
-                const errorMessage = validatePassword(password);
+    // Validate password on input
+    passwordInput.addEventListener('input', function (e) {
+        const password = e.target.value;
+        const errorMessage = validatePassword(password);
 
-                if (errorMessage) {
-                    passwordFeedback.textContent = errorMessage;
-                    passwordInput.classList.add('is-invalid');
-                } else {
-                    passwordFeedback.textContent = '';
-                    passwordInput.classList.remove('is-invalid');
-                }
-            });
+        if (errorMessage) {
+            passwordFeedback.textContent = errorMessage;
+            passwordInput.classList.add('is-invalid');
+        } else {
+            passwordFeedback.textContent = '';
+            passwordInput.classList.remove('is-invalid');
+        }
+    });
 
-            // Prevent form submission if password is invalid
-            document.querySelector('form').addEventListener('submit', function (e) {
-                const password = passwordInput.value;
-                const errorMessage = validatePassword(password);
+    // Prevent form submission if password is invalid
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const password = passwordInput.value;
+        const errorMessage = validatePassword(password);
 
-                if (errorMessage) {
-                    e.preventDefault(); // Prevent form submission
-                    passwordFeedback.textContent = errorMessage;
-                    passwordInput.classList.add('is-invalid');
-                }
-            });
+        if (errorMessage) {
+            e.preventDefault(); // Prevent form submission
+            passwordFeedback.textContent = errorMessage;
+            passwordInput.classList.add('is-invalid');
+        }
+    });
 
-            // Toggle password visibility
-            const togglePassword = document.getElementById('togglePassword');
-            const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const togglePasswordIcon = document.getElementById('togglePasswordIcon');
 
-            togglePassword.addEventListener('click', function () {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                togglePasswordIcon.style.opacity = type === 'password' ? '0.5' : '1';
-            });
+    togglePassword.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        togglePasswordIcon.style.opacity = type === 'password' ? '0.5' : '1';
+    });
 
-            // Toggle confirm password visibility
-            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-            const confirmPassword = document.getElementById('password_confirmation');
-            const toggleConfirmPasswordIcon = document.getElementById('toggleConfirmPasswordIcon');
+    // Toggle confirm password visibility
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirmPassword = document.getElementById('password_confirmation');
+    const toggleConfirmPasswordIcon = document.getElementById('toggleConfirmPasswordIcon');
 
-            toggleConfirmPassword.addEventListener('click', function () {
-                const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-                confirmPassword.setAttribute('type', type);
-                toggleConfirmPasswordIcon.style.opacity = type === 'password' ? '0.5' : '1';
-            });
+    toggleConfirmPassword.addEventListener('click', function () {
+        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPassword.setAttribute('type', type);
+        toggleConfirmPasswordIcon.style.opacity = type === 'password' ? '0.5' : '1';
+    });
 
-            // Format locality input
-            document.getElementById('locality').addEventListener('blur', function (e) {
-                let locality = e.target.value.trim();
-                locality = locality.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-                if (!locality.toLowerCase().includes('city')) {
-                    locality += ' City';
-                }
-                e.target.value = locality;
-            });
-        });
+    // Format locality input
+    document.getElementById('locality').addEventListener('blur', function (e) {
+        let locality = e.target.value.trim();
+        locality = locality.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+        if (!locality.toLowerCase().includes('city')) {
+            locality += ' City';
+        }
+        e.target.value = locality;
+    });
+});
     </script>
 </body>
 
