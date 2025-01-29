@@ -48,15 +48,16 @@ class ReviewController extends Controller
      
          // Handle search
          if ($request->has('search') && $request->search != '') {
-             $query->where(function ($q) use ($request) {
-                 $q->where('review_title', 'like', '%' . $request->search . '%')
-                   ->orWhereHas('destination', function($q) use ($request) {
-                       $q->where('company_name', 'like', '%' . $request->search . '%')
-                         ->orWhere('destination_name', 'like', '%' . $request->search . '%');
+             $search = $request->search;
+             $query->where(function ($q) use ($search) {
+                 $q->where('review_title', 'like', '%' . $search . '%')
+                   ->orWhereHas('destination', function($q) use ($search) {
+                       $q->where('company_name', 'like', '%' . $search . '%')
+                         ->orWhere('destination_name', 'like', '%' . $search . '%');
                    })
-                   ->orWhereHas('user', function($q) use ($request) {
-                       $q->where('firstname', 'like', '%' . $request->search . '%')
-                         ->orWhere('lastname', 'like', '%' . $request->search . '%');
+                   ->orWhereHas('user', function($q) use ($search) {
+                       $q->where('firstname', 'like', '%' . $search . '%')
+                         ->orWhere('lastname', 'like', '%' . $search . '%');
                    });
              });
          }
@@ -66,13 +67,13 @@ class ReviewController extends Controller
              $query->where('rating', (int) $request->rating);
          }
      
-         // Debugging: Check the query and results
-         // dd($query->toSql(), $query->getBindings(), $query->get());
+         // Sort by createdAt in descending order (latest first)
+         $query->orderBy('createdAt', 'desc');
      
          // Paginate the results
-         $reviews = $query->orderBy('createdAt', 'desc')->paginate(10);
+         $reviews = $query->paginate(10);
      
-         // Convert createdAt to Asia/Manila timezone for each review and change the format
+         // Format createdAt for each review
          foreach ($reviews as $review) {
              if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
                  // Convert MongoDB\BSON\UTCDateTime to Carbon instance
@@ -88,11 +89,10 @@ class ReviewController extends Controller
          return view('owner/reviews', [
              'title' => 'Reviews',
              'reviews' => $reviews,
-             'search' => $request->search,
-             'rating' => $request->rating,
+             'search' => $request->search ?? '',
+             'rating' => $request->rating ?? '',
          ]);
      }
-    
     
 
     //  public function adminindex(Request $request)
@@ -159,58 +159,64 @@ class ReviewController extends Controller
     //  }
     
      
-     public function showAdminReviews(Request $request)
-{
-    $adminId = Auth::id();
-
-    // Only reviews whose destination.user_id matches the admin
-    $query = Review::whereHas('destination', function($q) use ($adminId) {
-        $q->where('user_id', $adminId);
-    });
-
-    // Optional: search logic
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function($q) use ($search) {
-            $q->where('review_title', 'like', "%{$search}%")
-              ->orWhereHas('destination', function($sub) use ($search) {
-                  $sub->where('destination_name', 'like', "%{$search}%")
-                      ->orWhere('company_name', 'like', "%{$search}%");
-              })
-              ->orWhereHas('user', function($sub) use ($search) {
-                  $sub->where('firstname', 'like', "%{$search}%")
-                      ->orWhere('lastname', 'like', "%{$search}%");
-              });
-        });
-    }
-
-    // Optional: rating filter
-    if ($request->filled('rating')) {
-        $query->where('rating', (int)$request->rating);
-    }
-
-    // Sort + paginate
-    $reviews = $query->orderBy('createdAt', 'desc')->paginate(10);
-
-    foreach ($reviews as $review) {
-        if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
-            // Convert MongoDB\BSON\UTCDateTime to Carbon instance
-            $dateTime = $review->createdAt->toDateTime();
-
-            $review->formatted_created_at = Carbon::parse($dateTime)
-                ->setTimezone('Asia/Manila')
-                ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
-        }
-    }
+    public function showAdminReviews(Request $request)
+    {
+        // Debug the rating filter
+        \Log::info('Rating filter value:', ['rating' => $request->rating]);
     
-    return view('admin.reviews', [
-        'title'   => 'Reviews',
-        'reviews' => $reviews,
-        'search'  => $request->search,
-        'rating'  => $request->rating,
-    ]);
-}
-
+        $adminId = Auth::id();
+    
+        // Only reviews whose destination.user_id matches the admin
+        $query = Review::whereHas('destination', function($q) use ($adminId) {
+            $q->where('user_id', $adminId);
+        });
+    
+        // Optional: search logic
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('review_title', 'like', "%{$search}%")
+                  ->orWhereHas('destination', function($sub) use ($search) {
+                      $sub->where('destination_name', 'like', "%{$search}%")
+                          ->orWhere('company_name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('user', function($sub) use ($search) {
+                      $sub->where('firstname', 'like', "%{$search}%")
+                          ->orWhere('lastname', 'like', "%{$search}%");
+                  });
+            });
+        }
+    
+        // Optional: rating filter (cast to integer)
+        if ($request->filled('rating')) {
+            $query->where('rating', (int)$request->rating);
+        }
+    
+        // Sort by createdAt in descending order (latest first)
+        $query->orderBy('createdAt', 'desc');
+    
+        // Paginate the results
+        $reviews = $query->paginate(10);
+    
+        // Format createdAt for each review
+        foreach ($reviews as $review) {
+            if ($review->createdAt instanceof \MongoDB\BSON\UTCDateTime) {
+                // Convert MongoDB\BSON\UTCDateTime to Carbon instance
+                $dateTime = $review->createdAt->toDateTime();
+    
+                $review->formatted_created_at = Carbon::parse($dateTime)
+                    ->setTimezone('Asia/Manila')
+                    ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
+            }
+        }
+        
+        return view('admin.reviews', [
+            'title'   => 'Reviews',
+            'reviews' => $reviews,
+            'search'  => $request->search,
+            'rating'  => $request->rating,
+        ]);
+    }
 
     /**
      * Store a newly created resource in storage.

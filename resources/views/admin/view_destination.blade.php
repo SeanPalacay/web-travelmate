@@ -179,45 +179,76 @@
         					<h4>Destination Details</h4>
         					<div class="row">
                                 <div class="col-md-6">
-	                                <x-input-field
-	                                    label="Destination Name"
-	                                    name="destination_name"
-	                                    id="destination_name"
-	                                    type="text"
-	                                    placeholder="Destination Name"
-	                                    disabled="true"
-	                                    :value="old('destination_name', $application->destination_name  ?? '')"
-	                                />
+                                    <x-input-field
+                                        label="Destination Name"
+                                        name="destination_name"
+                                        id="destination_name"
+                                        type="text"
+                                        placeholder="Destination Name"
+                                        disabled="true"
+                                        :value="old('destination_name', $application->destination_name ?? '')"
+                                    />
+                                
+                                    <x-input-field
+                                        label="Category"
+                                        name="category"
+                                        id="category"
+                                        type="text"
+                                        placeholder="Destination Category"
+                                        disabled="true"
+                                        :value="old('category', $application->category ?? '')"
+                                    />
 
-	                                <x-input-field
-	                                    label="Category"
-	                                    name="category"
-	                                    id="category"
-	                                    type="text"
-	                                    placeholder="Destination Category"
-	                                    disabled="true"
-	                                    :value="old('category', $application->category  ?? '')"
-	                                />
-
-	                                <x-input-field
-	                                    label="Operating Hours"
-	                                    name="operating_hours"
-	                                    id="operating_hours"
-	                                    type="text"
-	                                    placeholder="Operating Hours"
-	                                    disabled="true"
-	                                    :value="old('operating_hours', $application->operating_hours  ?? '')"
-	                                />
-
-	                                <x-input-field
-	                                    label="Destination Address"
-	                                    name="destination_address"
-	                                    id="destination_address"
-	                                    type="text"
-	                                    placeholder="Destination Address"
-	                                    disabled="true"
-	                                    :value="old('destination_address', $application->destination_address  ?? '')"
-	                                />
+                                    @php
+    // Define the helper function
+    function convertTo12HourFormat($time) {
+        if ($time === null || $time === '') {
+            return 'N/A';
+        }
+        return date('h:i A', strtotime($time));
+    }
+@endphp
+                                
+                                    <!-- Operating Hours -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Operating Hours</label>
+                                        @php
+                                            // Decode the JSON string into an associative array
+                                            $operatingHours = json_decode($application->operating_hours, true);
+                                        @endphp
+                                        @if ($operatingHours)
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Day</th>
+                                                        <th>Opening Time</th>
+                                                        <th>Closing Time</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($operatingHours as $day => $hours)
+                                                        <tr>
+                                                            <td>{{ ucfirst($day) }}</td>
+                                                            <td>{{ convertTo12HourFormat($hours['start'] ?? '') }}</td>
+                                                            <td>{{ convertTo12HourFormat($hours['end'] ?? '') }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        @else
+                                            <p>No operating hours available.</p>
+                                        @endif
+                                    </div>
+                                
+                                    <x-input-field
+                                        label="Destination Address"
+                                        name="destination_address"
+                                        id="destination_address"
+                                        type="text"
+                                        placeholder="Destination Address"
+                                        disabled="true"
+                                        :value="old('destination_address', $application->destination_address ?? '')"
+                                    />
                                 </div>
                                 <div class="col-md-6">
                                 	

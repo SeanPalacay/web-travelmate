@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -21,23 +20,17 @@ class StoreDestinationRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'company_name' => 'required|string|max:255',
             'company_address' => 'required|string|max:255',
             'about' => 'nullable|string',
-            'company_permit' => 'required|file|mimes:jpg,png,jpeg|max:5120',
-            'location_clearance' => 'required|file|mimes:jpg,png,jpeg|max:5120',
-            'barangay_clearance' => 'required|file|mimes:jpg,png,jpeg|max:5120',
-            'philhealth' => 'required|file|mimes:jpg,png,jpeg|max:5120',
-            'corporate_bank_account' => 'required|file|mimes:jpg,png,jpeg|max:5120',
-            'sec_registration' => 'required|file|mimes:jpg,png,jpeg|max:5120',
-            'tin' => 'required|file|mimes:jpg,png,jpeg|max:5120',
-            'sss' => 'required|file|mimes:jpg,png,jpeg|max:5120',
             'destination_name' => 'required|string|max:255',
-            'category' => 'required',
-            'operating_hours' => 'required|string|max:100',
-            'destination_address' => 'required|string|min:3|max:255',
-            'locality' => 'required|string|min:3|max:20',
+            'category' => 'required|string|max:255',
+            'operating_days' => 'required|array',
+            'operating_hours_start' => 'required|array',
+            'operating_hours_end' => 'required|array',
+            'destination_address' => 'required|string|max:255',
+            'locality' => 'required|string|max:255',
             'nearest_landmark1' => 'nullable|string|max:255',
             'nearest_landmark2' => 'nullable|string|max:255',
             'nearest_landmark3' => 'nullable|string|max:255',
@@ -45,5 +38,19 @@ class StoreDestinationRequest extends FormRequest
             'status' => 'required|in:pending,approved,rejected',
             'user_id' => 'required',
         ];
+
+        // If this is a create request, make file fields required
+        if ($this->isMethod('POST')) {
+            $rules['company_permit'] = 'required|file|mimes:jpg,png,jpeg|max:5120';
+            $rules['location_clearance'] = 'required|file|mimes:jpg,png,jpeg|max:5120';
+            $rules['barangay_clearance'] = 'required|file|mimes:jpg,png,jpeg|max:5120';
+            $rules['philhealth'] = 'required|file|mimes:jpg,png,jpeg|max:5120';
+            $rules['corporate_bank_account'] = 'required|file|mimes:jpg,png,jpeg|max:5120';
+            $rules['sec_registration'] = 'required|file|mimes:jpg,png,jpeg|max:5120';
+            $rules['tin'] = 'required|file|mimes:jpg,png,jpeg|max:5120';
+            $rules['sss'] = 'required|file|mimes:jpg,png,jpeg|max:5120';
+        }
+
+        return $rules;
     }
 }

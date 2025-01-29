@@ -19,11 +19,17 @@
     rel="stylesheet"
   >
   <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+    }
+
     .card {
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       border: none;
       border-radius: 15px;
       background-color: #ffffff;
+      margin-bottom: 1.5rem;
     }
 
     .card-body {
@@ -33,10 +39,9 @@
     .form-title {
       font-weight: 700;
       color: #0D6EFD;
-      margin-top: 1.5rem; /* Reduced margin */
+      margin-top: 1.5rem;
       margin-bottom: 1rem;
-      font-size: 1.8rem; /* Smaller font size */
-      font-family: 'Poppins', sans-serif;
+      font-size: 1.8rem;
     }
 
     label {
@@ -50,8 +55,9 @@
     input[type="email"],
     input[type="password"],
     input[type="date"],
-    textarea {
-      border-radius: 20px;
+    textarea,
+    select {
+      border-radius: 10px;
       border: 1px solid #ced4da;
       padding: 0.6rem 1rem;
       font-size: 0.95rem;
@@ -62,18 +68,84 @@
     input[type="email"]:focus,
     input[type="password"]:focus,
     input[type="date"]:focus,
-    textarea:focus {
+    textarea:focus,
+    select:focus {
       outline: none;
       border-color: #0D6EFD;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-      transform: scale(1.02);
+      box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
     }
 
     .form-container {
-      background-color: #f8f9fa;
+      background-color: #ffffff;
       border-radius: 15px;
       padding: 2rem;
-      margin-top: 1.5rem; /* Reduced margin */
+      margin-top: 1.5rem;
+    }
+
+    .btn-primary {
+      background-color: #0D6EFD;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268;
+    }
+
+    .day-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .day-group select,
+    .day-group input {
+      flex: 1;
+    }
+
+    .remove-day {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .remove-day:hover {
+      background-color: #c82333;
+    }
+
+    .modal-content {
+      border-radius: 15px;
+    }
+
+    .modal-header {
+      border-bottom: none;
+    }
+
+    .modal-footer {
+      border-top: none;
     }
   </style>
 </head>
@@ -86,7 +158,7 @@
       </div>
 
       <div class="row justify-content-center mt-5">
-        <div class="col-sm-12 col-md-8 col-lg-10">
+        <div class="col-sm-12 col-md-10 col-lg-8">
           @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
               {{ session('success') }}
@@ -112,9 +184,9 @@
             <input type="hidden" name="status" value="approved">
 
             <!-- First Card: Company Details -->
-            <div class="card mb-4 form-container">
+            <div class="card form-container">
               <div class="card-body">
-                <h4>Company Details</h4>
+                <h4 class="mb-4">Company Details</h4>
                 <div class="row">
                   <div class="col-md-6">
                     <x-input-field
@@ -229,9 +301,9 @@
             </div>
 
             <!-- Second Card: Destination Details -->
-            <div class="card form-container">
+            <div class="card form-container mt-4">
               <div class="card-body">
-                <h4>Destination Details</h4>
+                <h4 class="mb-4">Destination Details</h4>
                 <div class="row">
                   <div class="col-md-6">
                     <x-input-field
@@ -299,14 +371,32 @@
                       @enderror
                     </div>
 
-                    <x-input-field
-                      label="Operating Hours"
-                      name="operating_hours"
-                      id="operating_hours"
-                      type="text"
-                      placeholder="Ex. Monday - Friday, 10:00 PM - 9:00 PM"
-                      :value="old('operating_hours', $application->operating_hours ?? '')"
-                    />
+                    <!-- Dynamic Operating Hours Section -->
+                    <div class="mb-3">
+                      <label class="form-label">Operating Hours</label>
+                      <div id="days-container">
+                        <!-- Days will be added here dynamically -->
+                        @if (isset($application->operating_hours))
+                          @foreach (json_decode($application->operating_hours, true) as $day => $hours)
+                            <div class="day-group">
+                              <select class="form-select" name="operating_days[]">
+                                <option value="mon" {{ $day === 'mon' ? 'selected' : '' }}>Monday</option>
+                                <option value="tue" {{ $day === 'tue' ? 'selected' : '' }}>Tuesday</option>
+                                <option value="wed" {{ $day === 'wed' ? 'selected' : '' }}>Wednesday</option>
+                                <option value="thu" {{ $day === 'thu' ? 'selected' : '' }}>Thursday</option>
+                                <option value="fri" {{ $day === 'fri' ? 'selected' : '' }}>Friday</option>
+                                <option value="sat" {{ $day === 'sat' ? 'selected' : '' }}>Saturday</option>
+                                <option value="sun" {{ $day === 'sun' ? 'selected' : '' }}>Sunday</option>
+                              </select>
+                              <input type="time" name="operating_hours_start[]" class="form-control" value="{{ $hours['start'] }}">
+                              <input type="time" name="operating_hours_end[]" class="form-control" value="{{ $hours['end'] }}">
+                              <button type="button" class="remove-day">Remove</button>
+                            </div>
+                          @endforeach
+                        @endif
+                      </div>
+                      <button type="button" id="add-day" class="btn btn-secondary mt-2">Add Day</button>
+                    </div>
 
                     <x-input-field
                       label="Destination Address"
@@ -357,7 +447,7 @@
                     />
 
                     <!-- Amenities (required) -->
-                    <x-input-field
+                    <x-textarea-field
                       label="Amenities"
                       name="amenities"
                       id="amenities"
@@ -696,29 +786,59 @@
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"
   ></script>
-  <script src="{{ asset('script.js') }}"></script>
-
-  <!-- On form submission, fix "locality" casing and ensure "City" is appended if missing -->
   <script>
+    // Add dynamic operating hours functionality
     document.addEventListener('DOMContentLoaded', function() {
-      const editForm = document.getElementById('editApplicationForm');
-      const localityInput = document.getElementById('locality');
+      const daysContainer = document.getElementById('days-container');
+      const addDayButton = document.getElementById('add-day');
 
-      editForm.addEventListener('submit', function(e) {
-        let val = localityInput.value.trim();
-        if (!val) return; // If empty, do nothing
+      addDayButton.addEventListener('click', function() {
+        const dayGroup = document.createElement('div');
+        dayGroup.classList.add('day-group');
 
-        // Split into words and capitalize each
-        let words = val.toLowerCase().split(/\s+/).map(word => {
-          return word.charAt(0).toUpperCase() + word.slice(1);
+        const daySelect = document.createElement('select');
+        daySelect.classList.add('form-select');
+        daySelect.name = 'operating_days[]';
+        daySelect.innerHTML = `
+          <option value="mon">Monday</option>
+          <option value="tue">Tuesday</option>
+          <option value="wed">Wednesday</option>
+          <option value="thu">Thursday</option>
+          <option value="fri">Friday</option>
+          <option value="sat">Saturday</option>
+          <option value="sun">Sunday</option>
+        `;
+
+        const startTime = document.createElement('input');
+        startTime.type = 'time';
+        startTime.name = 'operating_hours_start[]';
+        startTime.classList.add('form-control');
+
+        const endTime = document.createElement('input');
+        endTime.type = 'time';
+        endTime.name = 'operating_hours_end[]';
+        endTime.classList.add('form-control');
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.classList.add('remove-day');
+        removeButton.textContent = 'Remove';
+        removeButton.addEventListener('click', function() {
+          daysContainer.removeChild(dayGroup);
         });
-        let capitalized = words.join(' ');
 
-        // If "City" not found (case-insensitive), append it
-        if (!/city/i.test(capitalized)) {
-          capitalized += ' City';
-        }
-        localityInput.value = capitalized;
+        dayGroup.appendChild(daySelect);
+        dayGroup.appendChild(startTime);
+        dayGroup.appendChild(endTime);
+        dayGroup.appendChild(removeButton);
+        daysContainer.appendChild(dayGroup);
+      });
+
+      // Remove existing day groups
+      document.querySelectorAll('.remove-day').forEach(button => {
+        button.addEventListener('click', function() {
+          daysContainer.removeChild(button.closest('.day-group'));
+        });
       });
     });
   </script>

@@ -13,37 +13,45 @@ class ReportController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {
-        $adminLocality = auth()->user()->locality;
+{
+    // Debug the reason filter
+    \Log::info('Reason filter value:', ['reason' => $request->reason]);
 
-        $query = Report::whereHas('review.destination', function($q) use ($adminLocality) {
-            $q->where('locality', $adminLocality);
-        });
+    $adminLocality = auth()->user()->locality;
 
-        // If filtering by reason
-        if ($request->filled('reason')) {
-            $query->where('reason', $request->reason);
-        }
+    // Start the query for reports in the admin's locality
+    $query = Report::whereHas('review.destination', function($q) use ($adminLocality) {
+        $q->where('locality', $adminLocality);
+    });
 
-        $reports = $query
-            ->with(['review', 'review.destination'])
-            ->paginate(10);
-
-        // Format created_at
-        foreach ($reports as $report) {
-            if ($report->created_at) {
-                $report->formatted_created_at = Carbon::parse($report->created_at)
-                    ->setTimezone('Asia/Manila')
-                    ->format('F j, Y');
-            }
-        }
-
-        return view('admin/reports', [
-            'title'   => 'Reports',
-            'reports' => $reports,
-            'reason'  => $request->reason ?? '',
-        ]);
+    // If filtering by reason (case-insensitive)
+    if ($request->filled('reason')) {
+        $query->where('reason', 'like', '%' . $request->reason . '%');
     }
+
+    // Sort by created_at in descending order (latest first)
+    $query->orderBy('created_at', 'desc');
+
+    // Paginate the results
+    $reports = $query
+        ->with(['review', 'review.destination'])
+        ->paginate(10);
+
+    // Format created_at for each report
+    foreach ($reports as $report) {
+        if ($report->created_at) {
+            $report->formatted_created_at = Carbon::parse($report->created_at)
+                ->setTimezone('Asia/Manila')
+                ->format('F j, Y'); // Format as "Month, day, year" (e.g., October 11, 2024)
+        }
+    }
+
+    return view('admin/reports', [
+        'title'   => 'Reports',
+        'reports' => $reports,
+        'reason'  => $request->reason ?? '',
+    ]);
+}
     public function approve(string $id)
     {
         $report = Report::findOrFail($id);

@@ -56,6 +56,16 @@ class DestinationController extends Controller
             }
         }
     
+        // Process dynamic operating hours
+        $operatingHours = [];
+        foreach ($request->operating_days as $index => $day) {
+            $operatingHours[$day] = [
+                'start' => $request->operating_hours_start[$index],
+                'end' => $request->operating_hours_end[$index],
+            ];
+        }
+        $incomingFields['operating_hours'] = json_encode($operatingHours);
+    
         $fileNames = [];
     
         foreach ($this->fileFields as $field) {
@@ -69,7 +79,6 @@ class DestinationController extends Controller
     
         return redirect()->back()->with('success', 'Destination added successfully!');
     }
-    
     
     public function saveCoordinates(Request $request, string $id)
     {
@@ -197,7 +206,8 @@ public function showApproved(Request $request)
 
     // Start the query for approved destinations in the admin's locality
     $query = Destination::where('status', 'approved')
-                        ->where('locality', $adminLocality);
+                        ->where('locality', $adminLocality)
+                        ->orderBy('created_at', 'desc'); // Sort by latest first
 
     // Handle search
     if ($request->has('search') && $request->search != '') {
@@ -230,42 +240,43 @@ public function showApproved(Request $request)
   /**
      * Display destinations for owner (10 items per page).
      */
-    public function showOwnerDestinations(Request $request)
-    {
-        // Get the logged-in owner
-        $user = auth()->user();
+public function showOwnerDestinations(Request $request)
+{
+    // Get the logged-in owner
+    $user = auth()->user();
 
-        // Start the query for approved destinations
-        $query = Destination::where('user_id', $user->id)
-                            ->where('status', 'approved');
+    // Start the query for approved destinations, ordered by latest first
+    $query = Destination::where('user_id', $user->id)
+                        ->where('status', 'approved')
+                        ->orderBy('created_at', 'desc'); // Sort by latest first
 
-        // Handle search
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('company_name', 'like', '%' . $search . '%')
-                  ->orWhere('destination_name', 'like', '%' . $search . '%')
-                  ->orWhere('destination_address', 'like', '%' . $search . '%')
-                  ->orWhere('locality', 'like', '%' . $search . '%');
-            });
-        }
-
-        // Handle filter by category
-        if ($request->has('category') && $request->category != '') {
-            $query->where('category', $request->category);
-        }
-
-        // Paginate the results
-        $destinations = $query->paginate(10);
-
-        // Return the view with the filtered destinations
-        return view('owner/destinations', [
-            'title' => 'My Destinations',
-            'destinations' => $destinations,
-            'search' => $request->search, // Pass search term back to the view
-            'category' => $request->category, // Pass selected category back to the view
-        ]);
+    // Handle search
+    if ($request->has('search') && $request->search != '') {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('company_name', 'like', '%' . $search . '%')
+              ->orWhere('destination_name', 'like', '%' . $search . '%')
+              ->orWhere('destination_address', 'like', '%' . $search . '%')
+              ->orWhere('locality', 'like', '%' . $search . '%');
+        });
     }
+
+    // Handle filter by category
+    if ($request->has('category') && $request->category != '') {
+        $query->where('category', $request->category);
+    }
+
+    // Paginate the results
+    $destinations = $query->paginate(10);
+
+    // Return the view with the filtered destinations
+    return view('owner/destinations', [
+        'title' => 'My Destinations',
+        'destinations' => $destinations,
+        'search' => $request->search, // Pass search term back to the view
+        'category' => $request->category, // Pass selected category back to the view
+    ]);
+}
 
     public function showOwnerApplications(Request $request)
     {
@@ -308,80 +319,126 @@ public function showApproved(Request $request)
      */
     public function update(StoreDestinationRequest $request, string $id)
     {
+        $destination = Destination::findOrFail($id);
+    
+        // Update only the fields that have changed
         $incomingFields = $request->validated();
     
-        // Capitalize the first letter of each word in the specified fields
-        $fieldsToCapitalize = [
-            'company_name',
-            'company_address',
-            'destination_name',
-            'destination_address',
-            'locality',
-            'nearest_landmark1',
-            'nearest_landmark2',
-            'nearest_landmark3',
-            'amenities'
+        // Process dynamic operating hours
+        if ($request->has('operating_days')) {
+            $operatingHours = [];
+            foreach ($request->operating_days as $index => $day) {
+                $operatingHours[$day] = [
+                    'start' => $request->operating_hours_start[$index],
+                    'end' => $request->operating_hours_end[$index],
+                ];
+            }
+            $incomingFields['operating_hours'] = json_encode($operatingHours);
+        }
+    
+        // Handle file uploads (only if files are provided)
+        $fileFields = [
+            'company_permit',
+            'location_clearance',
+            'barangay_clearance',
+            'philhealth',
+            'corporate_bank_account',
+            'sec_registration',
+            'tin',
+            'sss',
         ];
     
-        foreach ($fieldsToCapitalize as $field) {
-            if (isset($incomingFields[$field])) {
-                $incomingFields[$field] = ucwords(strtolower($incomingFields[$field]));
-            }
-        }
-    
-        $fileNames = [];
-    
-        foreach ($this->fileFields as $field) {
+        foreach ($fileFields as $field) {
             if ($request->hasFile($field)) {
-                $fileNames[$field] = $this->handleFileUpload($request->file($field), $field);
+                // Delete the old file if it exists
+                if ($destination->$field) {
+                    $oldFilePath = public_path('images/' . $field . '/' . $destination->$field);
+                    if (File::exists($oldFilePath)) {
+                        File::delete($oldFilePath);
+                    }
+                }
+    
+                // Upload the new file
+                $file = $request->file($field);
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('images/' . $field), $fileName);
+                $incomingFields[$field] = $fileName;
+            } else {
+                // Retain the existing file if no new file is uploaded
+                unset($incomingFields[$field]);
             }
         }
     
-        $destination = Destination::findOrFail($id);
-        $incomingFields = array_merge($incomingFields, $fileNames);
+        // Update the destination
         $destination->update($incomingFields);
     
-        return redirect('/admin/destinations')->with('success', 'Destination updated successfully');
+        return redirect('/admin/destinations')->with('success', 'Destination updated successfully!');
     }
-    
-
     public function ownerupdate(StoreDestinationRequest $request, string $id)
-    {
-        $incomingFields = $request->validated();
-    
-        // Capitalize the first letter of each word in the specified fields
-        $fieldsToCapitalize = [
-            'company_name',
-            'company_address',
-            'destination_name',
-            'destination_address',
-            'locality',
-            'nearest_landmark1',
-            'nearest_landmark2',
-            'nearest_landmark3',
-            'amenities'
-        ];
-    
-        foreach ($fieldsToCapitalize as $field) {
-            if (isset($incomingFields[$field])) {
-                $incomingFields[$field] = ucwords(strtolower($incomingFields[$field]));
-            }
+{
+    $destination = Destination::findOrFail($id);
+
+    // Update only the fields that have changed
+    $incomingFields = $request->validated();
+
+    // Capitalize the first letter of each word in the specified fields
+    $fieldsToCapitalize = [
+        'company_name',
+        'company_address',
+        'destination_name',
+        'destination_address',
+        'locality',
+        'nearest_landmark1',
+        'nearest_landmark2',
+        'nearest_landmark3',
+        'amenities'
+    ];
+
+    foreach ($fieldsToCapitalize as $field) {
+        if (isset($incomingFields[$field])) {
+            $incomingFields[$field] = ucwords(strtolower($incomingFields[$field]));
         }
-    
-        $fileNames = [];
-    
-        foreach ($this->fileFields as $field) {
-            if ($request->hasFile($field)) {
-                $fileNames[$field] = $this->handleFileUpload($request->file($field), $field);
-            }
-        }
-    
-        $destination = Destination::findOrFail($id);
-        $incomingFields = array_merge($incomingFields, $fileNames);
-        $destination->update($incomingFields);
-    
-        return redirect('/owner/destinations')->with('success', 'Destination updated successfully');
     }
+
+    // Process dynamic operating hours
+    if ($request->has('operating_days')) {
+        $operatingHours = [];
+        foreach ($request->operating_days as $index => $day) {
+            $operatingHours[$day] = [
+                'start' => $request->operating_hours_start[$index],
+                'end' => $request->operating_hours_end[$index],
+            ];
+        }
+        $incomingFields['operating_hours'] = json_encode($operatingHours);
+    }
+
+    // Handle file uploads (only if files are provided)
+    foreach ($this->fileFields as $field) {
+        if ($request->hasFile($field)) {
+            // Delete the old file if it exists
+            if ($destination->$field) {
+                $oldFilePath = public_path('images/' . $field . '/' . $destination->$field);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+
+            // Upload the new file
+            $file = $request->file($field);
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('images/' . $field), $fileName);
+            $incomingFields[$field] = $fileName;
+        } else {
+            // Retain the existing file if no new file is uploaded
+            unset($incomingFields[$field]);
+        }
+    }
+
+    // Update the destination
+    $destination->update($incomingFields);
+
+    return redirect('/owner/destinations')->with('success', 'Destination updated successfully!');
+}
     
     public function approve(string $id)
     {

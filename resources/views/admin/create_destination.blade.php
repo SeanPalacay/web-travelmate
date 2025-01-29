@@ -82,6 +82,31 @@
       padding: 2rem;
       margin-top: 1.5rem; /* Reduced margin */
     }
+
+    .day-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .day-group select,
+    .day-group input[type="time"] {
+      flex: 1;
+    }
+
+    .remove-day {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .remove-day:hover {
+      background-color: #cc0000;
+    }
   </style>
 </head>
 <body>
@@ -267,14 +292,14 @@
                       ]"
                     />
 
-                    <x-input-field
-                      label="Operating Hours"
-                      name="operating_hours"
-                      id="operating_hours"
-                      type="text"
-                      placeholder="Ex. Monday - Friday, 10:00PM - 9:00PM"
-                      :value="old('operating_hours')"
-                    />
+                    <!-- Dynamic Operating Hours Section -->
+                    <div class="mb-3">
+                      <label class="form-label">Operating Hours</label>
+                      <div id="days-container">
+                        <!-- Days will be added here dynamically -->
+                      </div>
+                      <button type="button" id="add-day" class="btn btn-secondary mt-2">Add Day</button>
+                    </div>
 
                     <x-input-field
                       label="Destination Address"
@@ -356,6 +381,57 @@
     crossorigin="anonymous"
   ></script>
   <script src="{{ asset('script.js') }}"></script>
+
+  <!-- Dynamic Operating Hours Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const daysContainer = document.getElementById('days-container');
+      const addDayButton = document.getElementById('add-day');
+
+      addDayButton.addEventListener('click', function () {
+        const dayGroup = document.createElement('div');
+        dayGroup.className = 'day-group';
+
+        const daySelect = document.createElement('select');
+        daySelect.className = 'form-select';
+        daySelect.name = 'operating_days[]';
+        daySelect.innerHTML = `
+          <option value="mon">Monday</option>
+          <option value="tue">Tuesday</option>
+          <option value="wed">Wednesday</option>
+          <option value="thu">Thursday</option>
+          <option value="fri">Friday</option>
+          <option value="sat">Saturday</option>
+          <option value="sun">Sunday</option>
+        `;
+
+        const startTimeInput = document.createElement('input');
+        startTimeInput.type = 'time';
+        startTimeInput.name = 'operating_hours_start[]';
+        startTimeInput.className = 'form-control';
+
+        const endTimeInput = document.createElement('input');
+        endTimeInput.type = 'time';
+        endTimeInput.name = 'operating_hours_end[]';
+        endTimeInput.className = 'form-control';
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'remove-day';
+        removeButton.textContent = 'Remove';
+        removeButton.addEventListener('click', function () {
+          daysContainer.removeChild(dayGroup);
+        });
+
+        dayGroup.appendChild(daySelect);
+        dayGroup.appendChild(startTimeInput);
+        dayGroup.appendChild(endTimeInput);
+        dayGroup.appendChild(removeButton);
+
+        daysContainer.appendChild(dayGroup);
+      });
+    });
+  </script>
 
   <!-- Locality auto-fix (capitalize each word & append "City") -->
   <script>

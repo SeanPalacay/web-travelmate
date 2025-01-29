@@ -185,6 +185,15 @@
                         </form>
                     </div>
 
+                    @php
+    // Define the helper function
+    function convertTo12HourFormat($time) {
+        if ($time === null || $time === '') {
+            return 'N/A';
+        }
+        return date('h:i A', strtotime($time));
+    }
+@endphp
                     <!-- Table -->
                     <div class="table-responsive">
                         <table class="table table-hover table-striped">
@@ -207,7 +216,20 @@
                                         <td data-label="Company Name">{{ $destination->company_name }}</td>
                                         <td data-label="Destination">{{ $destination->destination_name }}</td>
                                         <td data-label="Category">{{ $destination->category }}</td>
-                                        <td data-label="Operating Hours">{{ $destination->operating_hours }}</td>
+                                        <td data-label="Operating Hours">
+                                            @if ($destination->operating_hours)
+                                                @php
+                                                    $operatingHours = json_decode($destination->operating_hours, true);
+                                                    $formattedHours = [];
+                                                    foreach ($operatingHours as $day => $hours) {
+                                                        $formattedHours[] = ucfirst($day) . ': ' . convertTo12HourFormat($hours['start']) . ' - ' . convertTo12HourFormat($hours['end']);
+                                                    }
+                                                    echo implode(', ', $formattedHours); // Display all hours in a single line
+                                                @endphp
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
                                         <td data-label="Address">{{ $destination->destination_address }}</td>
                                         <td data-label="Locality">{{ $destination->locality }}</td>
                                         <td data-label="Actions">
@@ -234,33 +256,32 @@
                     </div>
 
                     <!-- Pagination -->
-                <!-- Pagination -->
-<div class="d-flex justify-content-center mt-4">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            <!-- Previous Button -->
-            <li class="page-item {{ $destinations->onFirstPage() ? 'disabled' : '' }}">
-                <a class="page-link" href="{{ $destinations->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo; Previous</span>
-                </a>
-            </li>
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <!-- Previous Button -->
+                                <li class="page-item {{ $destinations->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $destinations->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Previous</span>
+                                    </a>
+                                </li>
 
-            <!-- Page Numbers -->
-            @for ($i = 1; $i <= $destinations->lastPage(); $i++)
-                <li class="page-item {{ $destinations->currentPage() == $i ? 'active' : '' }}">
-                    <a class="page-link" href="{{ $destinations->appends(request()->query())->url($i) }}">{{ $i }}</a>
-                </li>
-            @endfor
+                                <!-- Page Numbers -->
+                                @for ($i = 1; $i <= $destinations->lastPage(); $i++)
+                                    <li class="page-item {{ $destinations->currentPage() == $i ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $destinations->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
 
-            <!-- Next Button -->
-            <li class="page-item {{ $destinations->hasMorePages() ? '' : 'disabled' }}">
-                <a class="page-link" href="{{ $destinations->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
-                    <span aria-hidden="true">Next &raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</div>
+                                <!-- Next Button -->
+                                <li class="page-item {{ $destinations->hasMorePages() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $destinations->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
+                                        <span aria-hidden="true">Next &raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
 
                     <!-- Pagination Info -->
                     <div class="pagination-info">
@@ -273,49 +294,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('searchInput');
-            const filterSelect = document.getElementById('filterSelect');
-            const tableRows = document.querySelectorAll('#destinationsTable tr');
-
-            // Function to filter table rows
-            function filterTable() {
-                const searchText = searchInput.value.toLowerCase();
-                const filterValue = filterSelect.value.toLowerCase();
-
-                tableRows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    let shouldDisplay = true;
-
-                    // Filter by search input
-                    if (searchText) {
-                        let rowMatchesSearch = false;
-                        cells.forEach(cell => {
-                            if (cell.textContent.toLowerCase().includes(searchText)) {
-                                rowMatchesSearch = true;
-                            }
-                        });
-                        shouldDisplay = shouldDisplay && rowMatchesSearch;
-                    }
-
-                    // Filter by category dropdown
-                    if (filterValue) {
-                        const categoryCell = cells[3]; // Category is the 4th column (index 3)
-                        if (categoryCell.textContent.toLowerCase() !== filterValue) {
-                            shouldDisplay = false;
-                        }
-                    }
-
-                    // Show or hide the row
-                    row.style.display = shouldDisplay ? '' : 'none';
-                });
-            }
-
-            // Add event listeners
-            searchInput.addEventListener('input', filterTable);
-            filterSelect.addEventListener('change', filterTable);
-        });
-    </script> --}}
 </body>
 </html>

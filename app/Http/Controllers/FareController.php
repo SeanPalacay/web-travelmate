@@ -12,6 +12,9 @@ class FareController extends Controller
      */
     public function index(Request $request)
     {
+        // Debug the vehicle filter
+        \Log::info('Vehicle filter value:', ['vehicle' => $request->vehicle]);
+    
         // Get the logged-in user
         $user = auth()->user();
     
@@ -32,10 +35,13 @@ class FareController extends Controller
             });
         }
     
-        // Handle filter by vehicle type
+        // Handle filter by vehicle type (case-insensitive)
         if ($request->has('vehicle') && $request->vehicle != '') {
-            $query->where('vehicle', $request->vehicle);
+            $query->where('vehicle', 'like', '%' . $request->vehicle . '%');
         }
+    
+        // Sort by created_at in descending order (latest first)
+        $query->orderBy('created_at', 'desc');
     
         // Paginate the results with 10 items per page
         $fares = $query->paginate(10);

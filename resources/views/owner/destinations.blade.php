@@ -162,108 +162,127 @@
                 <div class="col-sm-12 col-md-10 col-lg-10">
                     <!-- Search and Filter -->
                     <div class="search-filter-container mb-3 d-flex gap-2">
-                    
-                      <!-- Search and Filter Form -->
-                      <form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
-                        <div class="input-group flex-grow-1">
-                            <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
-                        </div>
-                        <div class="input-group flex-grow-1">
-                            <select name="category" id="filterSelect" class="form-control">
-                                <option value="">All Destinations</option>
-                                <option value="Resort" {{ request('category') == 'Resort' ? 'selected' : '' }}>Resort</option>
-                                <option value="Hotel" {{ request('category') == 'Hotel' ? 'selected' : '' }}>Hotel</option>
-                                <option value="Park" {{ request('category') == 'Park' ? 'selected' : '' }}>Park</option>
-                                <option value="Adventure" {{ request('category') == 'Adventure' ? 'selected' : '' }}>Adventure</option>
-                                <option value="Sports" {{ request('category') == 'Sports' ? 'selected' : '' }}>Sports</option>
-                                <option value="Wine & Beer" {{ request('category') == 'Wine & Beer' ? 'selected' : '' }}>Wine & Beer</option>
-                                <option value="Restaurant" {{ request('category') == 'Restaurant' ? 'selected' : '' }}>Restaurant</option>
-                                <option value="Fastfood" {{ request('category') == 'Fastfood' ? 'selected' : '' }}>Fastfood</option>
-                                <option value="Church" {{ request('category') == 'Church' ? 'selected' : '' }}>Church</option>
-                                <option value="Art Galleries" {{ request('category') == 'Art Galleries' ? 'selected' : '' }}>Art Galleries</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Apply</button>
-                    </form>
+                        <form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+                            <div class="input-group flex-grow-1">
+                                <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+                            </div>
+                            <div class="input-group flex-grow-1">
+                                <select name="category" id="filterSelect" class="form-control">
+                                    <option value="">All Destinations</option>
+                                    <option value="Resort" {{ request('category') == 'Resort' ? 'selected' : '' }}>Resort</option>
+                                    <option value="Hotel" {{ request('category') == 'Hotel' ? 'selected' : '' }}>Hotel</option>
+                                    <option value="Park" {{ request('category') == 'Park' ? 'selected' : '' }}>Park</option>
+                                    <option value="Adventure" {{ request('category') == 'Adventure' ? 'selected' : '' }}>Adventure</option>
+                                    <option value="Sports" {{ request('category') == 'Sports' ? 'selected' : '' }}>Sports</option>
+                                    <option value="Wine & Beer" {{ request('category') == 'Wine & Beer' ? 'selected' : '' }}>Wine & Beer</option>
+                                    <option value="Restaurant" {{ request('category') == 'Restaurant' ? 'selected' : '' }}>Restaurant</option>
+                                    <option value="Fastfood" {{ request('category') == 'Fastfood' ? 'selected' : '' }}>Fastfood</option>
+                                    <option value="Church" {{ request('category') == 'Church' ? 'selected' : '' }}>Church</option>
+                                    <option value="Art Galleries" {{ request('category') == 'Art Galleries' ? 'selected' : '' }}>Art Galleries</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                        </form>
                     </div>
 
+                    @php
+                        // Helper function to convert time to 12-hour format
+                        function convertTo12HourFormat($time) {
+                            if ($time === null || $time === '') {
+                                return 'N/A';
+                            }
+                            return date('h:i A', strtotime($time));
+                        }
+                    @endphp
+
                     <!-- Table -->
-                 <!-- Table -->
-<div class="table-responsive">
-    <table class="table table-hover table-striped">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Company Name</th>
-                <th>Destination</th>
-                <th>Category</th>
-                <th>Operating Hours</th>
-                <th>Address</th>
-                <th>Locality</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="destinationsTable">
-            @forelse ($destinations as $destination)
-                <tr>
-                    <td data-label="#">{{ ($destinations->currentPage() - 1) * $destinations->perPage() + $loop->iteration }}</td>
-                    <td data-label="Company Name">{{ $destination->company_name }}</td>
-                    <td data-label="Destination">{{ $destination->destination_name }}</td>
-                    <td data-label="Category">{{ $destination->category }}</td>
-                    <td data-label="Operating Hours">{{ $destination->operating_hours }}</td>
-                    <td data-label="Address">{{ $destination->destination_address }}</td>
-                    <td data-label="Locality">{{ $destination->locality }}</td>
-                    <td data-label="Actions">
-                        <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-                            <a href="/owner/applications/view/{{ $destination->id }}" class="dropdown-item">View</a>
-                            <a href="/owner/applications/edit/{{ $destination->id }}" class="dropdown-item">Edit</a>
-                            <a href="/owner/destinations/presentation/{{ $destination->id }}" class="dropdown-item">Edit Landing Page</a>
-                            <form action="/owner/applications/delete/{{ $destination->id }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="dropdown-item">Delete</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="8" class="text-center">No data yet</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Company Name</th>
+                                    <th>Destination</th>
+                                    <th>Category</th>
+                                    <th>Operating Hours</th>
+                                    <th>Address</th>
+                                    <th>Locality</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="destinationsTable">
+                                @forelse ($destinations as $destination)
+                                    <tr>
+                                        <td data-label="#">{{ ($destinations->currentPage() - 1) * $destinations->perPage() + $loop->iteration }}</td>
+                                        <td data-label="Company Name">{{ $destination->company_name }}</td>
+                                        <td data-label="Destination">{{ $destination->destination_name }}</td>
+                                        <td data-label="Category">{{ $destination->category }}</td>
+                                        <td data-label="Operating Hours">
+                                            @if ($destination->operating_hours)
+                                                @php
+                                                    $operatingHours = json_decode($destination->operating_hours, true);
+                                                    $formattedHours = [];
+                                                    foreach ($operatingHours as $day => $hours) {
+                                                        $formattedHours[] = ucfirst($day) . ': ' . convertTo12HourFormat($hours['start']) . ' - ' . convertTo12HourFormat($hours['end']);
+                                                    }
+                                                    echo implode(', ', $formattedHours); // Display all hours in a single line
+                                                @endphp
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td>
+                                        <td data-label="Address">{{ $destination->destination_address }}</td>
+                                        <td data-label="Locality">{{ $destination->locality }}</td>
+                                        <td data-label="Actions">
+                                            <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <a href="/owner/applications/view/{{ $destination->id }}" class="dropdown-item">View</a>
+                                                <a href="/owner/applications/edit/{{ $destination->id }}" class="dropdown-item">Edit</a>
+                                                <a href="/owner/destinations/presentation/{{ $destination->id }}" class="dropdown-item">Edit Landing Page</a>
+                                                <form action="/owner/applications/delete/{{ $destination->id }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center">No data yet</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
 
                     <!-- Pagination -->
-                  <!-- Pagination -->
-<div class="d-flex justify-content-center mt-4">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            <!-- Previous Button -->
-            <li class="page-item {{ $destinations->onFirstPage() ? 'disabled' : '' }}">
-                <a class="page-link" href="{{ $destinations->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo; Previous</span>
-                </a>
-            </li>
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <!-- Previous Button -->
+                                <li class="page-item {{ $destinations->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $destinations->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Previous</span>
+                                    </a>
+                                </li>
 
-            <!-- Page Numbers -->
-            @for ($i = 1; $i <= $destinations->lastPage(); $i++)
-                <li class="page-item {{ $destinations->currentPage() == $i ? 'active' : '' }}">
-                    <a class="page-link" href="{{ $destinations->appends(request()->query())->url($i) }}">{{ $i }}</a>
-                </li>
-            @endfor
+                                <!-- Page Numbers -->
+                                @for ($i = 1; $i <= $destinations->lastPage(); $i++)
+                                    <li class="page-item {{ $destinations->currentPage() == $i ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $destinations->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
 
-            <!-- Next Button -->
-            <li class="page-item {{ $destinations->hasMorePages() ? '' : 'disabled' }}">
-                <a class="page-link" href="{{ $destinations->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
-                    <span aria-hidden="true">Next &raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</div>
+                                <!-- Next Button -->
+                                <li class="page-item {{ $destinations->hasMorePages() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $destinations->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
+                                        <span aria-hidden="true">Next &raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
 
                     <!-- Pagination Info -->
                     <div class="pagination-info">
@@ -276,49 +295,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('searchInput');
-            const filterSelect = document.getElementById('filterSelect');
-            const tableRows = document.querySelectorAll('#destinationsTable tr');
-
-            // Function to filter table rows
-            function filterTable() {
-                const searchText = searchInput.value.toLowerCase();
-                const filterValue = filterSelect.value.toLowerCase();
-
-                tableRows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    let shouldDisplay = true;
-
-                    // Filter by search input
-                    if (searchText) {
-                        let rowMatchesSearch = false;
-                        cells.forEach(cell => {
-                            if (cell.textContent.toLowerCase().includes(searchText)) {
-                                rowMatchesSearch = true;
-                            }
-                        });
-                        shouldDisplay = shouldDisplay && rowMatchesSearch;
-                    }
-
-                    // Filter by category dropdown
-                    if (filterValue) {
-                        const categoryCell = cells[3]; // Category is the 4th column (index 3)
-                        if (categoryCell.textContent.toLowerCase() !== filterValue) {
-                            shouldDisplay = false;
-                        }
-                    }
-
-                    // Show or hide the row
-                    row.style.display = shouldDisplay ? '' : 'none';
-                });
-            }
-
-            // Add event listeners
-            searchInput.addEventListener('input', filterTable);
-            filterSelect.addEventListener('change', filterTable);
-        });
-    </script> --}}
 </body>
 </html>

@@ -105,6 +105,32 @@
             animation: fadeInUp 1.5s ease forwards;
         }
 
+        /* Dynamic Operating Hours Styles */
+        .day-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .day-group select,
+        .day-group input[type="time"] {
+            flex: 1;
+        }
+
+        .remove-day {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .remove-day:hover {
+            background-color: #cc0000;
+        }
+
         /* Animation Effects */
         @keyframes fadeIn {
             0% {
@@ -320,14 +346,14 @@
                                             :options="['Resort', 'Hotel', 'Park', 'Adventure', 'Sports', 'Wine & Beer', 'Restaurant', 'Fastfood', 'Church', 'Art Galleries']"
                                         />
 
-                                        <x-input-field
-                                            label="Operating Hours"
-                                            name="operating_hours"
-                                            id="operating_hours"
-                                            type="text"
-                                            placeholder="Ex. Monday - Friday, 10:00PM - 9:00PM"
-                                            :value="old('operating_hours')"
-                                        />
+                                        <!-- Dynamic Operating Hours Section -->
+                                        <div class="mb-3">
+                                            <label class="form-label">Operating Hours</label>
+                                            <div id="days-container">
+                                                <!-- Days will be added here dynamically -->
+                                            </div>
+                                            <button type="button" id="add-day" class="btn btn-secondary mt-2">Add Day</button>
+                                        </div>
 
                                         <x-input-field
                                             label="Destination Address"
@@ -403,6 +429,55 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
     <script src="{{ asset('script.js') }}"></script>
     <script>
+        // Dynamic Operating Hours Script
+        document.addEventListener('DOMContentLoaded', function () {
+            const daysContainer = document.getElementById('days-container');
+            const addDayButton = document.getElementById('add-day');
+
+            addDayButton.addEventListener('click', function () {
+                const dayGroup = document.createElement('div');
+                dayGroup.className = 'day-group';
+
+                const daySelect = document.createElement('select');
+                daySelect.className = 'form-select';
+                daySelect.name = 'operating_days[]';
+                daySelect.innerHTML = `
+                    <option value="mon">Monday</option>
+                    <option value="tue">Tuesday</option>
+                    <option value="wed">Wednesday</option>
+                    <option value="thu">Thursday</option>
+                    <option value="fri">Friday</option>
+                    <option value="sat">Saturday</option>
+                    <option value="sun">Sunday</option>
+                `;
+
+                const startTimeInput = document.createElement('input');
+                startTimeInput.type = 'time';
+                startTimeInput.name = 'operating_hours_start[]';
+                startTimeInput.className = 'form-control';
+
+                const endTimeInput = document.createElement('input');
+                endTimeInput.type = 'time';
+                endTimeInput.name = 'operating_hours_end[]';
+                endTimeInput.className = 'form-control';
+
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'remove-day';
+                removeButton.textContent = 'Remove';
+                removeButton.addEventListener('click', function () {
+                    daysContainer.removeChild(dayGroup);
+                });
+
+                dayGroup.appendChild(daySelect);
+                dayGroup.appendChild(startTimeInput);
+                dayGroup.appendChild(endTimeInput);
+                dayGroup.appendChild(removeButton);
+
+                daysContainer.appendChild(dayGroup);
+            });
+        });
+
         // Locality Formatting
         document.addEventListener('DOMContentLoaded', function () {
             const localityInput = document.getElementById('locality');

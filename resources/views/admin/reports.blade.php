@@ -10,46 +10,38 @@
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('styles.css') }}">
     <style>
-             .table {
+        /* Table Styles */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             overflow: hidden;
             background-color: #ffffff;
+            margin-bottom: 20px;
         }
 
         .table th, .table td {
-            text-align: center;
             padding: 12px;
+            text-align: left;
             vertical-align: middle;
+            border-bottom: 1px solid #ddd;
         }
 
         .table th {
             background-color: #0D6EFD;
             color: #ffffff;
+            font-weight: 600;
             text-transform: uppercase;
             font-size: 0.875rem;
-            font-weight: 600;
         }
 
-        .table-hover tbody tr:hover {
-            background-color: #f1f1f1;
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
         .table-striped tbody tr:nth-of-type(odd) {
             background-color: #f9f9f9;
-        }
-
-        .dropdown-menu {
-            min-width: auto;
-        }
-
-        .lni-more {
-            cursor: pointer;
-            color: #0D6EFD;
-        }
-
-        .lni-more:hover {
-            color: #0b5ed7;
         }
 
         /* Status Badges */
@@ -136,8 +128,49 @@
             color: #6c757d;
         }
 
-        /* Mobile responsiveness */
+        /* Search and Filter Styles */
+        .search-filter-container {
+            display: flex;
+            gap: 10px; /* Space between search and filter */
+            margin-bottom: 20px;
+        }
+
+        .search-filter-container .input-group {
+            flex-grow: 1; /* Make both inputs take equal space */
+        }
+
+        .search-filter-container .form-control {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-filter-container .form-control:focus {
+            border-color: #0D6EFD;
+            box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+        }
+
+        .search-filter-container select.form-control {
+            appearance: none; /* Remove default arrow */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 30px; /* Space for the arrow */
+        }
+
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
+            .search-filter-container {
+                flex-direction: column;
+            }
+
+            .search-filter-container .input-group {
+                width: 100%;
+            }
+
             .table thead {
                 display: none;
             }
@@ -207,26 +240,29 @@
                         </div>
                     @endif
 
-                    <!-- Filter Form (Optional) -->
-                    <form action="{{ url()->current() }}" method="GET" class="mb-3 d-flex gap-2">
-                        <div class="input-group flex-grow-1">
-                            <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
-                        </div>
-
-                        <div class="input-group flex-grow-1">
-                            <select name="reason" id="filterSelect" class="form-control">
-                                <option value="">All Reports</option>
-                                <option value="False Information"  {{ request('reason') == 'False Information'  ? 'selected' : '' }}>False Information</option>
-                                <option value="Offensive Content"   {{ request('reason') == 'Offensive Content'   ? 'selected' : '' }}>Offensive Content</option>
-                                <option value="Spam"                {{ request('reason') == 'Spam'                ? 'selected' : '' }}>Spam</option>
-                                <option value="Conflicts of Interest" {{ request('reason') == 'Conflicts of Interest' ? 'selected' : '' }}>Conflicts of Interest</option>
-                                <option value="Privacy Violation"    {{ request('reason') == 'Privacy Violation'    ? 'selected' : '' }}>Privacy Violation</option>
-                                <option value="Irrelevant Content"   {{ request('reason') == 'Irrelevant Content'   ? 'selected' : '' }}>Irrelevant Content</option>
-                                <option value="Threats or Harassment" {{ request('reason') == 'Threats or Harassment' ? 'selected' : '' }}>Threats or Harassment</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Apply</button>
-                    </form>
+                    <!-- Search and Filter -->
+                    <div class="search-filter-container mb-3 d-flex gap-2">
+                        <form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+                            <div class="input-group flex-grow-1">
+                                <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+                            </div>
+                            <div class="input-group flex-grow-1">
+                                <select name="reason" id="filterSelect" class="form-control">
+                                    <option value="">All Reports</option>
+                                    <option value="False Information"  {{ request('reason') == 'False Information'  ? 'selected' : '' }}>False Information</option>
+                                    <option value="Offensive Content"   {{ request('reason') == 'Offensive Content'   ? 'selected' : '' }}>Offensive Content</option>
+                                    <option value="Spam"                {{ request('reason') == 'Spam'                ? 'selected' : '' }}>Spam</option>
+                                    <option value="Conflicts of Interest" {{ request('reason') == 'Conflicts of Interest' ? 'selected' : '' }}>Conflicts of Interest</option>
+                                    <option value="Privacy Violation"    {{ request('reason') == 'Privacy Violation'    ? 'selected' : '' }}>Privacy Violation</option>
+                                    <option value="Irrelevant Content"   {{ request('reason') == 'Irrelevant Content'   ? 'selected' : '' }}>Irrelevant Content</option>
+                                    <option value="Threats or Harassment" {{ request('reason') == 'Threats or Harassment' ? 'selected' : '' }}>Threats or Harassment</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                            <!-- Debugging: Display the selected reason -->
+                            <input type="hidden" name="debug_reason" value="{{ request('reason') }}">
+                        </form>
+                    </div>
 
                     <!-- Table -->
                     <div class="table-responsive">
@@ -276,17 +312,14 @@
                                         <td data-label="Actions">
                                             <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
                                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-
                                                 <!-- VIEW PROOF -->
                                                 <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $report->id }}">View</a>
-
                                                 <!-- APPROVE (DELETES REVIEW) -->
                                                 <form action="/admin/reports/approve/{{ $report->id }}" method="POST" style="display: inline;">
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit" class="dropdown-item">Approve</button>
                                                 </form>
-
                                                 <!-- DECLINE -->
                                                 <form action="/admin/reports/decline/{{ $report->id }}" method="POST" style="display: inline;">
                                                     @csrf
@@ -296,7 +329,7 @@
                                             </div>
                                         </td>
                                     </tr>
-
+                        
                                     <!-- Proof & Comment Modal -->
                                     <div class="modal fade" id="proofModal{{ $report->id }}" tabindex="-1" aria-labelledby="proofLabel{{ $report->id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
@@ -333,7 +366,7 @@
                         </table>
                     </div>
 
-                    <!-- Pagination Links -->
+                    <!-- Pagination -->
                     <div class="d-flex justify-content-center mt-4">
                         <nav aria-label="Page navigation">
                             <ul class="pagination">
@@ -343,14 +376,12 @@
                                         <span aria-hidden="true">&laquo; Previous</span>
                                     </a>
                                 </li>
-
                                 <!-- Page Numbers -->
                                 @for ($i = 1; $i <= $reports->lastPage(); $i++)
                                     <li class="page-item {{ $reports->currentPage() == $i ? 'active' : '' }}">
                                         <a class="page-link" href="{{ $reports->appends(request()->query())->url($i) }}">{{ $i }}</a>
                                     </li>
                                 @endfor
-
                                 <!-- Next Button -->
                                 <li class="page-item {{ $reports->hasMorePages() ? '' : 'disabled' }}">
                                     <a class="page-link" href="{{ $reports->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
@@ -374,30 +405,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    <script src="{{ asset('script.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterDropdown = document.querySelector('[data-filter-dropdown]');
-            const rows = document.querySelectorAll('#reportTableBody tr');
-
-            if (filterDropdown) {
-                filterDropdown.addEventListener('change', function() {
-                    const filterValue = this.value.toLowerCase();
-                    
-                    rows.forEach(row => {
-                        const reportCell = row.children[2];
-                        if (reportCell) {
-                            const reportText = reportCell.textContent.trim().toLowerCase();
-                            if (filterValue === '' || reportText.includes(filterValue)) {
-                                row.style.display = '';
-                            } else {
-                                row.style.display = 'none';
-                            }
-                        }
-                    });
-                });
-            }
-        });
-    </script>
 </body>
 </html>

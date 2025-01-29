@@ -44,28 +44,6 @@
             background-color: #f9f9f9;
         }
 
-        /* Status Badges */
-        .badge {
-            padding: 0.5em 0.75em;
-            border-radius: 0.25em;
-            font-size: 0.875rem;
-        }
-
-        .badge.bg-success {
-            background-color: #28a745;
-            color: #fff;
-        }
-
-        .badge.bg-danger {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
-        .badge.bg-warning {
-            background-color: #ffc107;
-            color: #000;
-        }
-
         /* Pagination Styles */
         .pagination {
             display: flex;
@@ -131,12 +109,12 @@
         /* Search and Filter Styles */
         .search-filter-container {
             display: flex;
-            gap: 10px; /* Space between search and filter */
+            gap: 10px;
             margin-bottom: 20px;
         }
 
         .search-filter-container .input-group {
-            flex-grow: 1; /* Make both inputs take equal space */
+            flex-grow: 1;
         }
 
         .search-filter-container .form-control {
@@ -153,12 +131,12 @@
         }
 
         .search-filter-container select.form-control {
-            appearance: none; /* Remove default arrow */
+            appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 10px center;
             background-size: 16px;
-            padding-right: 30px; /* Space for the arrow */
+            padding-right: 30px;
         }
 
         /* Mobile Responsiveness */
@@ -170,44 +148,6 @@
             .search-filter-container .input-group {
                 width: 100%;
             }
-
-            .table thead {
-                display: none;
-            }
-
-            .table tr {
-                display: block;
-                margin-bottom: 15px;
-            }
-
-            .table td {
-                display: block;
-                text-align: right;
-                font-size: 0.875rem;
-                border-bottom: 1px solid #ddd;
-                padding: 8px;
-            }
-
-            .table td:before {
-                content: attr(data-label);
-                float: left;
-                font-weight: 600;
-                color: #495057;
-            }
-
-            .table td:last-child {
-                border-bottom: 0;
-            }
-
-            .table-responsive {
-                border: none;
-            }
-        }
-
-        /* Reviews text styling */
-        h1 {
-            color: #0D6EFD; /* Make "Reviews" text this color */
-            margin-top: 20px; /* Add some margin on top of the "Reviews" text */
         }
     </style>
 </head>
@@ -238,22 +178,23 @@
                     @endif
 
                     <!-- Search and Filter Form -->
-                    <form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
-                        <div class="input-group flex-grow-1">
-                            <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
-                        </div>
-                        <div class="input-group flex-grow-1">
-                            <select name="rating" id="ratingFilter" class="form-control">
-                                <option value="">All Ratings</option>
-                                <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1</option>
-                                <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2</option>
-                                <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3</option>
-                                <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4</option>
-                                <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Apply</button>
-                    </form>
+       <!-- Search and Filter Form -->
+<form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+    <div class="input-group flex-grow-1" style="max-width: 300px;">
+        <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+    </div>
+    <div class="input-group flex-grow-1" style="max-width: 200px;">
+        <select name="rating" id="ratingFilter" class="form-control">
+            <option value="">All Ratings</option>
+            <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1</option>
+            <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2</option>
+            <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3</option>
+            <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4</option>
+            <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary" style="max-width: 100px;">Apply</button>
+</form>
 
                     <!-- Table -->
                     <div class="table-responsive">
@@ -289,7 +230,7 @@
                                         </td>
                                     </tr>
 
-                                    <!-- Modal for Proof & Comment (Unique per Review) -->
+                                    <!-- Proof & Comment Modal -->
                                     <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content border-0 shadow-lg">
@@ -312,7 +253,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Report Modal (Unique per Review) -->
+                                    <!-- Report Modal -->
                                     <div class="modal fade" id="reportModal{{ $review->_id }}" tabindex="-1" aria-labelledby="reportLabel{{ $review->_id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content border-0 shadow-lg">
@@ -323,21 +264,11 @@
                                                 <form id="reportForm-{{ $review->_id }}" action="/owner/reports/store" method="POST">
                                                     @csrf
                                                     <div class="modal-body">
-                                                        @if ($errors->any())
-                                                            <div class="alert alert-danger">
-                                                                <ul class="mb-0">
-                                                                    @foreach ($errors->all() as $error)
-                                                                        <li>{{ $error }}</li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                        @endif
                                                         <input type="hidden" value="{{ $review->id }}" name="review_id" id="review_id">
                                                         <input type="hidden" value="{{ $review->destination_id }}" name="destination_id" id="destination_id">
                                                         <input type="hidden" name="reason" id="reasonHidden-{{ $review->_id }}">
 
                                                         @php
-                                                            // Updated: add 'others' as a separate radio option
                                                             $reportOptions = [
                                                                 ['name' => 'radio_temp', 'value' => 'False information', 'label' => 'False information'],
                                                                 ['name' => 'radio_temp', 'value' => 'Offensive language', 'label' => 'Offensive language'],
@@ -350,25 +281,25 @@
                                                             ];
                                                         @endphp
 
-@foreach($reportOptions as $option)
-    <div class="form-check mb-2">
-        <input class="form-check-input"
-               type="radio"
-               name="radio_temp"
-               id="report_{{ $option['value'] }}_{{ $review->_id }}"
-               value="{{ $option['value'] }}">
-        <label class="form-check-label" for="report_{{ $option['value'] }}_{{ $review->_id }}">
-            {{ $option['label'] }}
-        </label>
-    </div>
-@endforeach
+                                                        @foreach($reportOptions as $option)
+                                                            <div class="form-check mb-2">
+                                                                <input class="form-check-input"
+                                                                       type="radio"
+                                                                       name="radio_temp"
+                                                                       id="report_{{ $option['value'] }}_{{ $review->_id }}"
+                                                                       value="{{ $option['value'] }}">
+                                                                <label class="form-check-label" for="report_{{ $option['value'] }}_{{ $review->_id }}">
+                                                                    {{ $option['label'] }}
+                                                                </label>
+                                                            </div>
+                                                        @endforeach
 
-<label for="others-{{ $review->_id }}" class="mt-3 fw-bold">Explain:</label>
-<textarea class="form-control mt-1"
-          name="others"
-          id="others-{{ $review->_id }}"
-          placeholder="Specify your reason here..."
-          rows="3"></textarea>
+                                                        <label for="others-{{ $review->_id }}" class="mt-3 fw-bold">Explain:</label>
+                                                        <textarea class="form-control mt-1"
+                                                                  name="others"
+                                                                  id="others-{{ $review->_id }}"
+                                                                  placeholder="Specify your reason here..."
+                                                                  rows="3"></textarea>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button class="btn btn-primary w-100 fw-bold" type="submit">Submit Report</button>
@@ -386,25 +317,20 @@
                         </table>
                     </div>
 
-                    <!-- Pagination Links -->
+                    <!-- Pagination -->
                     <div class="d-flex justify-content-center mt-4">
                         <nav aria-label="Page navigation">
                             <ul class="pagination">
-                                <!-- Previous Button -->
                                 <li class="page-item {{ $reviews->onFirstPage() ? 'disabled' : '' }}">
                                     <a class="page-link" href="{{ $reviews->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo; Previous</span>
                                     </a>
                                 </li>
-
-                                <!-- Page Numbers -->
                                 @for ($i = 1; $i <= $reviews->lastPage(); $i++)
                                     <li class="page-item {{ $reviews->currentPage() == $i ? 'active' : '' }}">
                                         <a class="page-link" href="{{ $reviews->appends(request()->query())->url($i) }}">{{ $i }}</a>
                                     </li>
                                 @endfor
-
-                                <!-- Next Button -->
                                 <li class="page-item {{ $reviews->hasMorePages() ? '' : 'disabled' }}">
                                     <a class="page-link" href="{{ $reviews->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
                                         <span aria-hidden="true">Next &raquo;</span>
@@ -422,97 +348,6 @@
             </div>
         </div>
     </div>
-
-    <!-- JavaScript logic -->
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-    @foreach($reviews as $review)
-    (function() {
-        const form = document.getElementById('reportForm-{{ $review->_id }}');
-        const reasonHidden = document.getElementById('reasonHidden-{{ $review->_id }}');
-        const radioButtons = form.querySelectorAll('input[name="radio_temp"]');
-        const othersField = document.getElementById('others-{{ $review->_id }}');
-        const othersRadio = document.getElementById('report_others_{{ $review->_id }}');
-        const reportModal = document.getElementById('reportModal{{ $review->_id }}');
-
-        // Listen for input in the textarea
-        othersField.addEventListener('input', function() {
-            if (this.value.trim() !== '') {
-                othersRadio.checked = true; // Automatically select "Others" if text is entered
-            }
-        });
-
-        // On form submit, set the hidden "reason" input
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent the default form submission
-
-            // Find which radio is checked
-            let selectedRadio = Array.from(radioButtons).find(r => r.checked);
-
-            if (selectedRadio) {
-                // If "others," reason = the text area
-                if (selectedRadio.value === 'others') {
-                    reasonHidden.value = othersField.value.trim();
-                } else {
-                    // Otherwise, reason = radio's value
-                    reasonHidden.value = selectedRadio.value;
-                }
-            } else {
-                // If no radio is selected, see if user typed in the text area
-                let othersText = othersField.value.trim();
-                if (othersText.length > 0) {
-                    reasonHidden.value = othersText;
-                }
-                // Else let server handle validation
-            }
-
-            // Submit the form via AJAX
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}', // Add CSRF token
-                    'Accept': 'application/json', // Ensure the response is JSON
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: data.message || 'Report submitted successfully.',
-                        confirmButtonText: 'OK',
-                    }).then(() => {
-                        // Close the modal after success
-                        const modal = bootstrap.Modal.getInstance(reportModal);
-                        modal.hide();
-                    });
-                } else {
-                    // Show error message
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: data.message || 'Failed to submit report. Please try again.',
-                        confirmButtonText: 'OK',
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'An error occurred while submitting the report. Please try again.',
-                    confirmButtonText: 'OK',
-                });
-            });
-        });
-    })();
-    @endforeach
-});
-    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"

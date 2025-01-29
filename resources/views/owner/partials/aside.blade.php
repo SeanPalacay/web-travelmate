@@ -5,15 +5,18 @@
             <h3 style="font-weight: bold; color: #ffffff; font-size: 2rem; text-align: center; white-space: nowrap; font-family: 'Poppins', sans-serif;">TRAVELMATE</h3>
         </div>
     </div>
-    <div class="usertype text-center mb-4" style="font-size: 2rem; padding-top: 10px;">
-        <h5 style="font-weight: 600; color: #ffffff; font-size: 1.8rem; font-family: 'Poppins', sans-serif;">OWNER</h5>
-    </div>
-    <ul class="sidebar-nav list-unstyled">
 
+    <div class="usertype text-center mb-4" style="font-size: 2rem; padding-top: 10px;">
+        <h5 style="font-weight: 800; font-size: 1.5rem; color: #ffffff; font-family: 'Poppins', sans-serif;">        {{ auth()->user()->firstname }} {{ auth()->user()->lastname }}
+            <h3 style="font-weight: 300; color: #ffffff; font-size: 1rem; font-family: 'Poppins', sans-serif;">Owner</h3>
+    </div>
+
+
+    <ul class="sidebar-nav list-unstyled">
         <li class="sidebar-item mb-3">
             <div class="sidebar-item-wrapper d-flex align-items-center" style="background-color: #ffffff; border-radius: 5px; padding: 10px;">
                 <a href="/owner/dashboard" class="sidebar-link d-flex align-items-center w-100" style="text-decoration: none; color: #000;">
-                <i class="lni lni-agenda me-3" style="font-size: 1.5rem;"></i>
+                    <i class="lni lni-agenda me-3" style="font-size: 1.5rem;"></i>
                     <span style="font-size: 1.1rem; font-family: 'Poppins', sans-serif;">Dashboard</span>
                 </a>
             </div>
@@ -67,73 +70,3 @@
         </div>
     </div>
 </aside>
-
-<!-- Include Google Font Poppins -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
-<style>
-    /* Sidebar Styles */
-    #sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: 260px;
-        background: linear-gradient(180deg, #0b0e1f, #0040ff);
-        color: #000;
-        padding: 1rem;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        overflow-y: auto; /* Allow scrolling within the sidebar if content overflows */
-        transition: width 0.5s ease;
-        z-index: 1000; /* Ensure sidebar is above other content */
-    }
-
-    #sidebar.expand {
-        width: 260px;
-    }
-
-    #sidebar:not(.expand) {
-        width: 80px;
-    }
-
-    .sidebar-link:hover {
-        background-color: rgba(0, 0, 0, 0.1);
-        transform: scale(1.05);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .sidebar-logo, .usertype {
-        transition: opacity 0.5s ease;
-    }
-
-    #sidebar:not(.expand) .sidebar-logo, #sidebar:not(.expand) .usertype {
-        opacity: 0;
-    }
-
-    /* Adjust main content margin to account for the sidebar */
-    .main {
-        margin-left: 260px; /* Matches the sidebar width */
-        transition: margin-left 0.5s ease;
-    }
-
-    @media (max-width: 768px) {
-        #sidebar {
-            width: 80px;
-        }
-
-        #sidebar.expand {
-            width: 260px;
-        }
-
-        .main {
-            margin-left: 80px;
-        }
-    }
-</style>
-
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('expand');
-    }
-</script>

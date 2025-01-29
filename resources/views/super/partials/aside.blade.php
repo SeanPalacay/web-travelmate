@@ -6,6 +6,8 @@
         </div>
     </div>
     <div class="usertype text-center mb-4" style="font-size: 2rem; padding-top: 10px;">
+        <h5 style="font-weight: 800; font-size: 1.5rem; color: #ffffff; font-family: 'Poppins', sans-serif;">        {{ auth()->user()->firstname }} {{ auth()->user()->lastname }}
+
         <h5 style="font-weight: 600; color: #fff; font-size: 1.8rem; font-family: 'Poppins', sans-serif;">SUPER</h5>
     </div>
     <ul class="sidebar-nav list-unstyled">

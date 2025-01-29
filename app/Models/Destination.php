@@ -25,7 +25,7 @@ class Destination extends Model
         'sss',
         'destination_name',
         'category',
-        'operating_hours',
+        'operating_hours', // Ensure this is included
         'destination_address',
         'locality',
         'nearest_landmark1',
@@ -39,6 +39,7 @@ class Destination extends Model
     protected $casts = [
         '_id' => 'string',
         'user_id' => 'string',
+        'operating_hours' => 'array', // Cast operating_hours to an array
     ];
 
     public function user() {
@@ -53,5 +54,4 @@ class Destination extends Model
     public function reports() {
         return $this->hasMany(Report::class);
     }
-
 }

@@ -12,45 +12,36 @@
     <style>
         /* Table Styles */
         .table {
+            width: 100%;
+            border-collapse: collapse;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             overflow: hidden;
             background-color: #ffffff;
+            margin-bottom: 20px;
         }
 
         .table th, .table td {
-            text-align: center; /* Center the table headers and cells */
             padding: 12px;
+            text-align: left;
             vertical-align: middle;
+            border-bottom: 1px solid #ddd;
         }
 
         .table th {
             background-color: #0D6EFD;
             color: #ffffff;
+            font-weight: 600;
             text-transform: uppercase;
             font-size: 0.875rem;
-            font-weight: 600;
         }
 
-        .table-hover tbody tr:hover {
-            background-color: #f1f1f1;
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
         .table-striped tbody tr:nth-of-type(odd) {
             background-color: #f9f9f9;
-        }
-
-        .dropdown-menu {
-            min-width: auto;
-        }
-
-        .lni-more {
-            cursor: pointer;
-            color: #0D6EFD;
-        }
-
-        .lni-more:hover {
-            color: #0b5ed7;
         }
 
         /* Pagination Styles */
@@ -115,8 +106,49 @@
             color: #6c757d;
         }
 
-        /* Mobile responsiveness */
+        /* Search and Filter Styles */
+        .search-filter-container {
+            display: flex;
+            gap: 10px; /* Space between search and filter */
+            margin-bottom: 20px;
+        }
+
+        .search-filter-container .input-group {
+            flex-grow: 1; /* Make both inputs take equal space */
+        }
+
+        .search-filter-container .form-control {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-filter-container .form-control:focus {
+            border-color: #0D6EFD;
+            box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+        }
+
+        .search-filter-container select.form-control {
+            appearance: none; /* Remove default arrow */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 30px; /* Space for the arrow */
+        }
+
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
+            .search-filter-container {
+                flex-direction: column;
+            }
+
+            .search-filter-container .input-group {
+                width: 100%;
+            }
+
             .table thead {
                 display: none;
             }
@@ -159,26 +191,29 @@
 </head>
 <body>
     @auth
-    @if (auth()->user()->locality)
-        <!-- Display fares -->
+        @if (auth()->user()->locality)
+            <!-- Display fares -->
+        @else
+            <div class="alert alert-warning">
+                Your locality is not set. Please update your profile.
+            </div>
+        @endif
     @else
-        <div class="alert alert-warning">
-            Your locality is not set. Please update your profile.
+        <div class="alert alert-danger">
+            You must be logged in to view fares.
         </div>
-    @endif
-@else
-    <div class="alert alert-danger">
-        You must be logged in to view fares.
-    </div>
-@endauth
+    @endauth
+
     <div class="wrapper">
         @include('admin/partials/aside')
         <div class="main p-3">
             <div class="text-center">
                 <h1>Fares</h1>
             </div>
+
             <div class="row justify-content-center mt-5">
                 <div class="col-sm-12 col-md-12 col-lg-12">
+                    <!-- SUCCESS ALERT -->
                     @if (session('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
@@ -196,6 +231,7 @@
                         </script>
                     @endif
 
+                    <!-- ERROR ALERT -->
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul>
@@ -206,26 +242,30 @@
                         </div>
                     @endif
 
-                    <!-- Vehicle Filter Dropdown -->
-                <!-- Search and Filter Form -->
-<form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
-    <div class="input-group flex-grow-1">
-        <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
-    </div>
-    <div class="input-group flex-grow-1">
-        <select name="vehicle" id="filterSelect" class="form-control">
-            <option value="">All Vehicles</option>
-            <option value="e-trike" {{ request('vehicle') == 'e-trike' ? 'selected' : '' }}>E-Trike</option>
-            <option value="traditional jeepney" {{ request('vehicle') == 'traditional jeepney' ? 'selected' : '' }}>Traditional Jeepney</option>
-            <option value="modern jeepney" {{ request('vehicle') == 'modern jeepney' ? 'selected' : '' }}>Modern Jeepney</option>
-            <option value="tricycle" {{ request('vehicle') == 'tricycle' ? 'selected' : '' }}>Tricycle</option>
-            <option value="taxi" {{ request('vehicle') == 'taxi' ? 'selected' : '' }}>Taxi</option>
-            <option value="padyak" {{ request('vehicle') == 'padyak' ? 'selected' : '' }}>Padyak</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Apply</button>
-</form>
+                    <!-- Search and Filter -->
+                    <div class="search-filter-container mb-3 d-flex gap-2">
+                        <form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+                            <div class="input-group flex-grow-1">
+                                <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+                            </div>
+                            <div class="input-group flex-grow-1">
+                                <select name="vehicle" id="filterSelect" class="form-control">
+                                    <option value="">All Vehicles</option>
+                                    <option value="e-trike" {{ request('vehicle') == 'e-trike' ? 'selected' : '' }}>E-Trike</option>
+                                    <option value="traditional jeepney" {{ request('vehicle') == 'traditional jeepney' ? 'selected' : '' }}>Traditional Jeepney</option>
+                                    <option value="modern jeepney" {{ request('vehicle') == 'modern jeepney' ? 'selected' : '' }}>Modern Jeepney</option>
+                                    <option value="tricycle" {{ request('vehicle') == 'tricycle' ? 'selected' : '' }}>Tricycle</option>
+                                    <option value="taxi" {{ request('vehicle') == 'taxi' ? 'selected' : '' }}>Taxi</option>
+                                    <option value="padyak" {{ request('vehicle') == 'padyak' ? 'selected' : '' }}>Padyak</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                            <!-- Debugging: Display the selected vehicle -->
+                            <input type="hidden" name="debug_vehicle" value="{{ request('vehicle') }}">
+                        </form>
+                    </div>
 
+                    <!-- Table -->
                     <div class="table-responsive">
                         <table class="table table-hover table-striped">
                             <thead>
@@ -273,34 +313,32 @@
                         </table>
                     </div>
 
-                    <!-- Pagination Links -->
-                 <!-- Pagination Links -->
-<div class="d-flex justify-content-center mt-4">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            <!-- Previous Button -->
-            <li class="page-item {{ $fares->onFirstPage() ? 'disabled' : '' }}">
-                <a class="page-link" href="{{ $fares->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo; Previous</span>
-                </a>
-            </li>
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <!-- Previous Button -->
+                                <li class="page-item {{ $fares->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $fares->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo; Previous</span>
+                                    </a>
+                                </li>
+                                <!-- Page Numbers -->
+                                @for ($i = 1; $i <= $fares->lastPage(); $i++)
+                                    <li class="page-item {{ $fares->currentPage() == $i ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ $fares->appends(request()->query())->url($i) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+                                <!-- Next Button -->
+                                <li class="page-item {{ $fares->hasMorePages() ? '' : 'disabled' }}">
+                                    <a class="page-link" href="{{ $fares->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
+                                        <span aria-hidden="true">Next &raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
 
-            <!-- Page Numbers -->
-            @for ($i = 1; $i <= $fares->lastPage(); $i++)
-                <li class="page-item {{ $fares->currentPage() == $i ? 'active' : '' }}">
-                    <a class="page-link" href="{{ $fares->appends(request()->query())->url($i) }}">{{ $i }}</a>
-                </li>
-            @endfor
-
-            <!-- Next Button -->
-            <li class="page-item {{ $fares->hasMorePages() ? '' : 'disabled' }}">
-                <a class="page-link" href="{{ $fares->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
-                    <span aria-hidden="true">Next &raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</div>
                     <!-- Pagination Info -->
                     <div class="pagination-info">
                         Showing {{ $fares->firstItem() }} to {{ $fares->lastItem() }} of {{ $fares->total() }} results
@@ -309,9 +347,10 @@
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    <script src="{{ asset('script.js') }}"></script>
 </body>
 </html>

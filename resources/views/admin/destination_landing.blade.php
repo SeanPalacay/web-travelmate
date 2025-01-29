@@ -123,7 +123,23 @@
                             <dt class="col-sm-4 data-field"><strong>Category:</strong></dt>
                             <dd class="col-sm-8 data-value">{{ $destination->category }}</dd>
                             <dt class="col-sm-4 data-field"><strong>Operating Hours:</strong></dt>
-                            <dd class="col-sm-8 data-value">{{ $destination->operating_hours }}</dd>
+                            <dd class="col-sm-8 data-value">
+                                @php
+                                    // Decode the JSON string into an associative array
+                                    $operatingHours = json_decode($destination->operating_hours, true);
+                                    $formattedHours = [];
+                                    if ($operatingHours) {
+                                        foreach ($operatingHours as $day => $hours) {
+                                            $startTime = date('h:i A', strtotime($hours['start']));
+                                            $endTime = date('h:i A', strtotime($hours['end']));
+                                            $formattedHours[] = ucfirst($day) . ': ' . $startTime . ' - ' . $endTime;
+                                        }
+                                        echo implode(', ', $formattedHours); // Display all hours in a single line
+                                    } else {
+                                        echo 'N/A';
+                                    }
+                                @endphp
+                            </dd>
                             <dt class="col-sm-4 data-field"><strong>Destination Address:</strong></dt>
                             <dd class="col-sm-8 data-value">{{ $destination->destination_address }}</dd>
                             <dt class="col-sm-4 data-field"><strong>Amenities:</strong></dt>
