@@ -341,7 +341,7 @@
                                                 <div class="modal-body">
                                                     @if($report->review->proof)
                                                         <img class="img-fluid rounded mb-4 shadow-sm" 
-                                                            src="https://travelmate-be.onrender.com/{{ $report->review->proof }}" 
+                                                            src="https://travelmate-express-be.onrender.com/{{ $report->review->proof }}" 
                                                             alt="Proof"
                                                             onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
                                                     @else
