@@ -44,6 +44,30 @@
             background-color: #f9f9f9;
         }
 
+        /* Status Badge Styles */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .status-badge.pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .status-badge.approved {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .status-badge.rejected {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
         /* Pagination Styles */
         .pagination {
             display: flex;
@@ -178,23 +202,22 @@
                     @endif
 
                     <!-- Search and Filter Form -->
-       <!-- Search and Filter Form -->
-<form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
-    <div class="input-group flex-grow-1" style="max-width: 300px;">
-        <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
-    </div>
-    <div class="input-group flex-grow-1" style="max-width: 200px;">
-        <select name="rating" id="ratingFilter" class="form-control">
-            <option value="">All Ratings</option>
-            <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1</option>
-            <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2</option>
-            <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3</option>
-            <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4</option>
-            <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary" style="max-width: 100px;">Apply</button>
-</form>
+                    <form action="{{ url()->current() }}" method="GET" class="search-filter-container mb-3 d-flex gap-2">
+                        <div class="input-group flex-grow-1" style="max-width: 300px;">
+                            <input type="search" name="search" id="searchInput" placeholder="Search..." class="form-control" value="{{ request('search') }}">
+                        </div>
+                        <div class="input-group flex-grow-1" style="max-width: 200px;">
+                            <select name="rating" id="ratingFilter" class="form-control">
+                                <option value="">All Ratings</option>
+                                <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1</option>
+                                <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2</option>
+                                <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3</option>
+                                <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4</option>
+                                <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="max-width: 100px;">Apply</button>
+                    </form>
 
                     <!-- Table -->
                     <div class="table-responsive">
@@ -208,112 +231,47 @@
                                     <th>Reviewer</th>
                                     <th>Ratings</th>
                                     <th>Date Created</th>
+                                    <th>Status</th> <!-- New Status Column -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="reviewsTable">
+                            <tbody>
                                 @forelse ($reviews as $review)
                                     <tr>
-                                        <td data-label="#">{{ ($reviews->currentPage() - 1) * $reviews->perPage() + $loop->iteration }}</td>
-                                        <td data-label="Company Name">{{ $review->destination->company_name }}</td>
-                                        <td data-label="Destination">{{ $review->destination->destination_name }}</td>
-                                        <td data-label="Review Title">{{ $review->review_title }}</td>
-                                        <td data-label="Reviewer">{{ $review->user->firstname }} {{ $review->user->lastname }}</td>
-                                        <td data-label="Ratings">{{ $review->rating }}</td>
-                                        <td data-label="Date Created">{{ $review->formatted_created_at }}</td>
-                                        <td data-label="Actions">
-                                            <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
-                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                        <td>{{ ($reviews->currentPage() - 1) * $reviews->perPage() + $loop->iteration }}</td>
+                                        <td>{{ $review->destination->company_name }}</td>
+                                        <td>{{ $review->destination->destination_name }}</td>
+                                        <td>{{ $review->review_title }}</td>
+                                        <td>{{ $review->user->firstname }} {{ $review->user->lastname }}</td>
+                                        <td>{{ $review->rating }}</td>
+                                        <td>{{ $review->formatted_created_at }}</td>
+                                        <td>
+                                            <span class="status-badge 
+                                                {{ $review->status === 'approved' ? 'approved' : 
+                                                   ($review->status === 'pending' ? 'pending' : 
+                                                   ($review->status === 'declined' ? 'declined' : 'secondary')) }}">
+                                                {{ ucfirst($review->status) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <i class="lni lni-more" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                                            <div class="dropdown-menu dropdown-menu-right">
                                                 <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
-                                                <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal{{ $review->_id }}">Report</a>
+                                                <form action="/admin/reviews/delete/{{ $review->id }}" method="POST" style="display: inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item">Delete</button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
-
-                                    <!-- Proof & Comment Modal -->
-                                    <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content border-0 shadow-lg">
-                                                <div class="modal-header bg-light">
-                                                    <h1 class="modal-title fs-4 fw-bold text-dark" id="proofLabel{{ $review->_id }}">Proof & Comment</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    @if($review->proof)
-                                                        <img class="img-fluid rounded mb-4 shadow-sm" 
-                                                             src="https://travelmate-express-be.onrender.com/{{ $review->proof }}" 
-                                                             alt="Proof"
-                                                             onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
-                                                    @else
-                                                        <p class="text-muted">No proof image available</p>
-                                                    @endif
-                                                    <p class="text-muted mt-3">{{ $review->comment ?? 'No comment available' }}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Report Modal -->
-                                    <div class="modal fade" id="reportModal{{ $review->_id }}" tabindex="-1" aria-labelledby="reportLabel{{ $review->_id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content border-0 shadow-lg">
-                                                <div class="modal-header bg-light">
-                                                    <h1 class="modal-title fs-4 fw-bold text-dark" id="reportLabel{{ $review->_id }}">Report Review</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <form id="reportForm-{{ $review->_id }}" action="/owner/reports/store" method="POST">
-                                                    @csrf
-                                                    <div class="modal-body">
-                                                        <input type="hidden" value="{{ $review->id }}" name="review_id" id="review_id">
-                                                        <input type="hidden" value="{{ $review->destination_id }}" name="destination_id" id="destination_id">
-                                                        <input type="hidden" name="reason" id="reasonHidden-{{ $review->_id }}">
-
-                                                        @php
-                                                            $reportOptions = [
-                                                                ['name' => 'radio_temp', 'value' => 'False information', 'label' => 'False information'],
-                                                                ['name' => 'radio_temp', 'value' => 'Offensive language', 'label' => 'Offensive language'],
-                                                                ['name' => 'radio_temp', 'value' => 'Spam', 'label' => 'Spam'],
-                                                                ['name' => 'radio_temp', 'value' => 'Conflict of interest', 'label' => 'Conflict of interest'],
-                                                                ['name' => 'radio_temp', 'value' => 'Privacy violation', 'label' => 'Privacy violation'],
-                                                                ['name' => 'radio_temp', 'value' => 'Irrelevant content', 'label' => 'Irrelevant content'],
-                                                                ['name' => 'radio_temp', 'value' => 'Threats', 'label' => 'Threats'],
-                                                                ['name' => 'radio_temp', 'value' => 'others', 'label' => 'Others (please specify)'],
-                                                            ];
-                                                        @endphp
-
-                                                        @foreach($reportOptions as $option)
-                                                            <div class="form-check mb-2">
-                                                                <input class="form-check-input"
-                                                                       type="radio"
-                                                                       name="radio_temp"
-                                                                       id="report_{{ $option['value'] }}_{{ $review->_id }}"
-                                                                       value="{{ $option['value'] }}">
-                                                                <label class="form-check-label" for="report_{{ $option['value'] }}_{{ $review->_id }}">
-                                                                    {{ $option['label'] }}
-                                                                </label>
-                                                            </div>
-                                                        @endforeach
-
-                                                        <label for="others-{{ $review->_id }}" class="mt-3 fw-bold">Explain:</label>
-                                                        <textarea class="form-control mt-1"
-                                                                  name="others"
-                                                                  id="others-{{ $review->_id }}"
-                                                                  placeholder="Specify your reason here..."
-                                                                  rows="3"></textarea>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button class="btn btn-primary w-100 fw-bold" type="submit">Submit Report</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">No data yet</td>
+                                        <td colspan="9" class="text-center">No data yet</td>
                                     </tr>
                                 @endforelse
                             </tbody>
+                            
                         </table>
                     </div>
 

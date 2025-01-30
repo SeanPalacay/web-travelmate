@@ -185,75 +185,87 @@
           <!-- Table -->
           <div class="table-responsive">
             <table class="table table-hover table-striped">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Company Name</th>
-                  <th>Destination</th>
-                  <th>Review Title</th>
-                  <th>Reviewer</th>
-                  <th>Ratings</th>
-                  <th>Date Created</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @forelse ($reviews as $review)
-                  <tr>
-                    <td>
-                      {{ ($reviews->currentPage() - 1) * $reviews->perPage() + $loop->iteration }}
-                    </td>
-                    <td>{{ $review->destination->company_name }}</td>
-                    <td>{{ $review->destination->destination_name }}</td>
-                    <td>{{ $review->review_title }}</td>
-                    <td>{{ $review->user->firstname }} {{ $review->user->lastname }}</td>
-                    <td>{{ $review->rating }}</td>
-                    <td>{{ $review->formatted_created_at }}</td>
-                    <td>
-                      <i class="lni lni-more" data-bs-toggle="dropdown" aria-expanded="false"></i>
-                      <div class="dropdown-menu dropdown-menu-right">
-                        <!-- Show proof/comment in modal, or delete, etc. -->
-                        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
-                        <form action="/admin/reviews/delete/{{ $review->id }}" method="POST" style="display: inline;">
-                          @csrf
-                          @method('DELETE')
-                          <button type="submit" class="dropdown-item">Delete</button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-
-                  <!-- Proof & Comment Modal -->
-                  <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                      <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header bg-light">
-                          <h1 class="modal-title fs-4 fw-bold text-dark" id="proofLabel{{ $review->_id }}">Proof &amp; Comment</h1>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Company Name</th>
+                        <th>Destination</th>
+                        <th>Review Title</th>
+                        <th>Reviewer</th>
+                        <th>Ratings</th>
+                        <th>Status</th> <!-- Added Status Column -->
+                        <th>Date Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($reviews as $review)
+                        <tr>
+                            <td>
+                                {{ ($reviews->currentPage() - 1) * $reviews->perPage() + $loop->iteration }}
+                            </td>
+                            <td>{{ $review->destination->company_name }}</td>
+                            <td>{{ $review->destination->destination_name }}</td>
+                            <td>{{ $review->review_title }}</td>
+                            <td>{{ $review->user->firstname }} {{ $review->user->lastname }}</td>
+                            <td>{{ $review->rating }}</td>
+                            <td>
+                                @if($review->status === 'approved')
+                                    <span class="badge bg-success">Approved</span>
+                                @elseif($review->status === 'pending')
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                @elseif($review->status === 'rejected')
+                                    <span class="badge bg-danger">Rejected</span>
+                                @else
+                                    <span class="badge bg-secondary">Unknown</span>
+                                @endif
+                            </td>
+                            <td>{{ $review->formatted_created_at }}</td>
+                            <td>
+                                <i class="lni lni-more" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
+                                    <form action="/admin/reviews/delete/{{ $review->id }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                
+                        <!-- Proof & Comment Modal -->
+                        <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow-lg">
+                                    <div class="modal-header bg-light">
+                                        <h1 class="modal-title fs-4 fw-bold text-dark" id="proofLabel{{ $review->_id }}">Proof &amp; Comment</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        @if($review->proof)
+                                            <img class="img-fluid rounded mb-4 shadow-sm"
+                                                 src="https://travelmate-express-be.onrender.com/{{ $review->proof }}"
+                                                 alt="Proof"
+                                                 onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
+                                        @else
+                                            <p class="text-muted mb-0">No proof image available</p>
+                                        @endif
+                                        <p class="text-muted mt-3">
+                                            {{ $review->comment ?? 'No comment available' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                          @if($review->proof)
-                            <img class="img-fluid rounded mb-4 shadow-sm"
-                                 src="https://travelmate-express-be.onrender.com/{{ $review->proof }}"
-                                 alt="Proof"
-                                 onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
-                          @else
-                            <p class="text-muted mb-0">No proof image available</p>
-                          @endif
-                          <p class="text-muted mt-3">
-                            {{ $review->comment ?? 'No comment available' }}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                @empty
-                  <tr>
-                    <td colspan="8" class="text-center">No data yet</td>
-                  </tr>
-                @endforelse
-              </tbody>
+                
+                    @empty
+                        <tr>
+                            <td colspan="9" class="text-center">No data yet</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                
             </table>
           </div>
 

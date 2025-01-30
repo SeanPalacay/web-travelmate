@@ -200,28 +200,45 @@
                                     />
 
                                     <!-- Operating Hours -->
-                                    <div class="mb-3">
-                                        <label class="form-label">Operating Hours</label>
-                                        @php
-                                            // Define the helper function
-                                            function convertTo12HourFormat($time) {
-                                                if ($time === null || $time === '') {
-                                                    return 'N/A';
-                                                }
-                                                return date('h:i A', strtotime($time));
-                                            }
+                                  <!-- Operating Hours -->
+<div class="mb-3">
+    <label class="form-label">Operating Hours</label>
+    @php
+        // Define the helper function
+        function convertTo12HourFormat($time) {
+            if ($time === null || $time === '') {
+                return 'N/A';
+            }
+            return date('h:i A', strtotime($time));
+        }
 
-                                            // Decode the operating hours JSON
-                                            $operatingHours = json_decode($application->operating_hours, true);
-                                            $formattedHours = [];
-                                            if ($operatingHours) {
-                                                foreach ($operatingHours as $day => $hours) {
-                                                    $formattedHours[] = ucfirst($day) . ': ' . convertTo12HourFormat($hours['start']) . ' - ' . convertTo12HourFormat($hours['end']);
-                                                }
-                                            }
-                                        @endphp
-                                        <input type="text" class="form-control" value="{{ $operatingHours ? implode(', ', $formattedHours) : 'N/A' }}" disabled>
-                                    </div>
+        // Decode the operating hours JSON
+        $operatingHours = json_decode($application->operating_hours, true);
+    @endphp
+
+    @if ($operatingHours)
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Opening Time</th>
+                    <th>Closing Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($operatingHours as $day => $hours)
+                    <tr>
+                        <td>{{ ucfirst($day) }}</td>
+                        <td>{{ convertTo12HourFormat($hours['start']) }}</td>
+                        <td>{{ convertTo12HourFormat($hours['end']) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <p>No operating hours available.</p>
+    @endif
+</div>
 
                                     <x-input-field
                                         label="Destination Address"

@@ -321,10 +321,16 @@ public function showOwnerDestinations(Request $request)
     {
         $destination = Destination::findOrFail($id);
     
-        // Update only the fields that have changed
-        $incomingFields = $request->validated();
+        // Ensure admins can update
+        if (auth()->user()->type !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
     
-        // Process dynamic operating hours
+        // Get validated fields but EXCLUDE user_id
+        $incomingFields = $request->except(['user_id']);
+        $incomingFields['user_id'] = $destination->user_id; // Retain original owner
+    
+        // Process dynamic operating hours if provided
         if ($request->has('operating_days')) {
             $operatingHours = [];
             foreach ($request->operating_days as $index => $day) {
@@ -336,44 +342,42 @@ public function showOwnerDestinations(Request $request)
             $incomingFields['operating_hours'] = json_encode($operatingHours);
         }
     
-        // Handle file uploads (only if files are provided)
+        // Handle file uploads
         $fileFields = [
-            'company_permit',
-            'location_clearance',
-            'barangay_clearance',
-            'philhealth',
-            'corporate_bank_account',
-            'sec_registration',
-            'tin',
-            'sss',
+            'company_permit', 'location_clearance', 'barangay_clearance', 'philhealth',
+            'corporate_bank_account', 'sec_registration', 'tin', 'sss'
         ];
     
         foreach ($fileFields as $field) {
             if ($request->hasFile($field)) {
-                // Delete the old file if it exists
+                // Delete old file
                 if ($destination->$field) {
                     $oldFilePath = public_path('images/' . $field . '/' . $destination->$field);
                     if (File::exists($oldFilePath)) {
                         File::delete($oldFilePath);
                     }
                 }
-    
-                // Upload the new file
+                // Upload new file
                 $file = $request->file($field);
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $file->move(public_path('images/' . $field), $fileName);
                 $incomingFields[$field] = $fileName;
             } else {
-                // Retain the existing file if no new file is uploaded
-                unset($incomingFields[$field]);
+                unset($incomingFields[$field]); // Keep existing file
             }
         }
     
-        // Update the destination
+        // Ensure status update is allowed
+        if ($request->has('status')) {
+            $incomingFields['status'] = $request->status;
+        }
+    
+        // Perform update
         $destination->update($incomingFields);
     
         return redirect('/admin/destinations')->with('success', 'Destination updated successfully!');
     }
+    
     public function ownerupdate(StoreDestinationRequest $request, string $id)
 {
     $destination = Destination::findOrFail($id);

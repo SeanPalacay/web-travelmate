@@ -146,49 +146,28 @@
             			</div>
 
             			<!-- Second Card -->
-            			<div class="card">
-            				<div class="card-body">
-            					<h4>Destination Details</h4>
-            					<div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>Destination Details</h4>
+                                <div class="row">
                                     <div class="col-md-6">
-                                        <x-input-field
-                                            label="Destination Name"
-                                            name="destination_name"
-                                            id="destination_name"
-                                            type="text"
-                                            placeholder="Destination Name"
-                                            disabled="true"
-                                            :value="old('destination_name', $application->destination_name  ?? '')"
-                                        />
-                                    
-                                        <x-input-field
-                                            label="Category"
-                                            name="category"
-                                            id="category"
-                                            type="text"
-                                            placeholder="Destination Category"
-                                            disabled="true"
-                                            :value="old('category', $application->category  ?? '')"
-                                        />
-                                    
+                                        <x-input-field label="Destination Name" name="destination_name" id="destination_name" type="text" disabled="true" 
+                                            :value="old('destination_name', $application->destination_name ?? '')" />
+                                        
+                                        <x-input-field label="Category" name="category" id="category" type="text" disabled="true" 
+                                            :value="old('category', $application->category ?? '')" />
+    
                                         <!-- Operating Hours -->
-                                        @php
-                                            function convertTo12HourFormat($time) {
-                                                if ($time === null || $time === '' || !strtotime($time)) {
-                                                    return 'N/A';
-                                                }
-                                                return date('h:i A', strtotime($time));
-                                            }
-                                    
-                                            $operatingHours = json_decode($application->operating_hours, true);
-                                            if (json_last_error() !== JSON_ERROR_NONE) {
-                                                $operatingHours = [];
-                                            }
-                                        @endphp
                                         <div class="mb-3">
                                             <label class="form-label">Operating Hours</label>
+                                            @php
+                                                function convertTo12HourFormat($time) {
+                                                    return $time ? date('h:i A', strtotime($time)) : 'N/A';
+                                                }
+                                                $operatingHours = json_decode($application->operating_hours, true);
+                                            @endphp
                                             @if ($operatingHours)
-                                                <table class="table table-bordered" aria-label="Operating Hours">
+                                                <table class="table table-bordered">
                                                     <thead>
                                                         <tr>
                                                             <th>Day</th>
@@ -210,19 +189,30 @@
                                                 <p>No operating hours available.</p>
                                             @endif
                                         </div>
-                                    
-                                        <x-input-field
-                                            label="Destination Address"
-                                            name="destination_address"
-                                            id="destination_address"
-                                            type="text"
-                                            placeholder="Destination Address"
+    
+                                        <x-input-field label="Destination Address" name="destination_address" id="destination_address" type="text" disabled="true" 
+                                            :value="old('destination_address', $application->destination_address ?? '')" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <x-input-field label="Nearest Landmark 1" name="nearest_landmark1" id="nearest_landmark1" type="text" disabled="true" 
+                                            :value="old('nearest_landmark1', $application->nearest_landmark1 ?? '')" />
+                                        <x-input-field label="Nearest Landmark 2" name="nearest_landmark2" id="nearest_landmark2" type="text" disabled="true" 
+                                            :value="old('nearest_landmark2', $application->nearest_landmark2 ?? '')" />
+                                        <x-input-field label="Nearest Landmark 3" name="nearest_landmark3" id="nearest_landmark3" type="text" disabled="true" 
+                                            :value="old('nearest_landmark3', $application->nearest_landmark3 ?? '')" />
+                                            <x-input-field
+                                            label="Amenities"
+                                            name="amenities"
+                                            id="amenities"
+                                            type="textarea"
+                                            placeholder="List of amenities"
                                             disabled="true"
-                                            :value="old('destination_address', $application->destination_address  ?? '')"
+                                            :value="old('amenities', $application->amenities  ?? '')"
                                         />
                                     </div>
-            					</div>
-
+                                </div>
+                            </div>
+                        </div>
             					<div class="row mt-4">
 		                            <div class="col-12">
                                         <form action="/owner/applications/delete/{{ $application->id }}" method="POST" style="display: inline;">

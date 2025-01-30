@@ -158,7 +158,7 @@
       </div>
 
       <div class="row justify-content-center mt-5">
-        <div class="col-sm-12 col-md-10 col-lg-8">
+        <div class="col-sm-12 col-md-10 col-lg-10">
           @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
               {{ session('success') }}
@@ -220,79 +220,103 @@
                   <div class="col-md-6">
                     <div class="row">
                       <div class="col-sm-12 col-md-6">
-                        <x-input-field
-                          label="Company Permit"
-                          name="company_permit"
-                          id="company_permit"
-                          type="file"
-                          placeholder="Permit ID"
-                          :value="old('company_permit')"
-                        />
+                        <div class="mb-3">
+                          <label for="company_permit" class="form-label">Company Permit</label>
+                          @if ($application->company_permit)
+                            <div class="mb-2">
+                              <a href="{{ asset('images/company_permit/' . $application->company_permit) }}" target="_blank">
+                                View Current File
+                              </a>
+                            </div>
+                          @endif
+                          <input type="file" name="company_permit" id="company_permit" class="form-control">
+                        </div>
 
-                        <x-input-field
-                          label="Location Clearance"
-                          name="location_clearance"
-                          id="location_clearance"
-                          type="file"
-                          placeholder="Location Clearance ID"
-                          :value="old('location_clearance')"
-                        />
+                        <div class="mb-3">
+                          <label for="location_clearance" class="form-label">Location Clearance</label>
+                          @if ($application->location_clearance)
+                            <div class="mb-2">
+                              <a href="{{ asset('images/location_clearance/' . $application->location_clearance) }}" target="_blank">
+                                View Current File
+                              </a>
+                            </div>
+                          @endif
+                          <input type="file" name="location_clearance" id="location_clearance" class="form-control">
+                        </div>
 
-                        <x-input-field
-                          label="Barangay Clearance"
-                          name="barangay_clearance"
-                          id="barangay_clearance"
-                          type="file"
-                          placeholder="Barangay Clearance ID"
-                          :value="old('barangay_clearance')"
-                        />
+                        <div class="mb-3">
+                          <label for="barangay_clearance" class="form-label">Barangay Clearance</label>
+                          @if ($application->barangay_clearance)
+                            <div class="mb-2">
+                              <a href="{{ asset('images/barangay_clearance/' . $application->barangay_clearance) }}" target="_blank">
+                                View Current File
+                              </a>
+                            </div>
+                          @endif
+                          <input type="file" name="barangay_clearance" id="barangay_clearance" class="form-control">
+                        </div>
 
-                        <x-input-field
-                          label="Philhealth"
-                          name="philhealth"
-                          id="philhealth"
-                          type="file"
-                          placeholder="Philhealth ID"
-                          :value="old('philhealth')"
-                        />
+                        <div class="mb-3">
+                          <label for="philhealth" class="form-label">Philhealth</label>
+                          @if ($application->philhealth)
+                            <div class="mb-2">
+                              <a href="{{ asset('images/philhealth/' . $application->philhealth) }}" target="_blank">
+                                View Current File
+                              </a>
+                            </div>
+                          @endif
+                          <input type="file" name="philhealth" id="philhealth" class="form-control">
+                        </div>
                       </div>
 
                       <div class="col-sm-12 col-md-6">
-                        <x-input-field
-                          label="Corporate Bank Account"
-                          name="corporate_bank_account"
-                          id="corporate_bank_account"
-                          type="file"
-                          placeholder="Bank Account No."
-                          :value="old('corporate_bank_account')"
-                        />
+                        <div class="mb-3">
+                          <label for="corporate_bank_account" class="form-label">Corporate Bank Account</label>
+                          @if ($application->corporate_bank_account)
+                            <div class="mb-2">
+                              <a href="{{ asset('images/corporate_bank_account/' . $application->corporate_bank_account) }}" target="_blank">
+                                View Current File
+                              </a>
+                            </div>
+                          @endif
+                          <input type="file" name="corporate_bank_account" id="corporate_bank_account" class="form-control">
+                        </div>
 
-                        <x-input-field
-                          label="SEC Registration"
-                          name="sec_registration"
-                          id="sec_registration"
-                          type="file"
-                          placeholder="SEC Registration No."
-                          :value="old('sec_registration')"
-                        />
+                        <div class="mb-3">
+                          <label for="sec_registration" class="form-label">SEC Registration</label>
+                          @if ($application->sec_registration)
+                            <div class="mb-2">
+                              <a href="{{ asset('images/sec_registration/' . $application->sec_registration) }}" target="_blank">
+                                View Current File
+                              </a>
+                            </div>
+                          @endif
+                          <input type="file" name="sec_registration" id="sec_registration" class="form-control">
+                        </div>
 
-                        <x-input-field
-                          label="TIN"
-                          name="tin"
-                          id="tin"
-                          type="file"
-                          placeholder="TIN No."
-                          :value="old('tin')"
-                        />
+                        <div class="mb-3">
+                          <label for="tin" class="form-label">TIN</label>
+                          @if ($application->tin)
+                            <div class="mb-2">
+                              <a href="{{ asset('images/tin/' . $application->tin) }}" target="_blank">
+                                View Current File
+                              </a>
+                            </div>
+                          @endif
+                          <input type="file" name="tin" id="tin" class="form-control">
+                        </div>
 
-                        <x-input-field
-                          label="SSS"
-                          name="sss"
-                          id="sss"
-                          type="file"
-                          placeholder="SSS No."
-                          :value="old('sss')"
-                        />
+                        <div class="mb-3">
+                          <label for="sss" class="form-label">SSS</label>
+                          @if ($application->sss)
+                            <div class="mb-2">
+                              <a href="{{ asset('images/sss/' . $application->sss) }}" target="_blank">
+                                View Current File
+                              </a>
+                            </div>
+                          @endif
+                          <input type="file" name="sss" id="sss" class="form-control">
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -447,7 +471,7 @@
                     />
 
                     <!-- Amenities (required) -->
-                    <x-textarea-field
+                    <x-input-field
                       label="Amenities"
                       name="amenities"
                       id="amenities"
@@ -839,6 +863,29 @@
         button.addEventListener('click', function() {
           daysContainer.removeChild(button.closest('.day-group'));
         });
+      });
+    });
+
+    // Auto-correct "locality" on form submission (capitalize each word, ensure "City")
+    document.addEventListener('DOMContentLoaded', function() {
+      const editApplicationForm = document.getElementById('editApplicationForm');
+      const localityField = document.getElementById('locality');
+
+      editApplicationForm.addEventListener('submit', function(e) {
+        let val = localityField.value.trim();
+        if (!val) return;
+
+        // Split into words, lowercase them, then capitalize
+        let words = val.toLowerCase().split(/\s+/).map(word => {
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        });
+        let capitalized = words.join(' ');
+
+        // If "City" not found (case-insensitive), append it
+        if (!/city/i.test(capitalized)) {
+          capitalized += ' City';
+        }
+        localityField.value = capitalized;
       });
     });
   </script>
