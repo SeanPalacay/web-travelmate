@@ -95,17 +95,18 @@
                 </div>
             </li>
         </ul>
+        <div class="sidebar-footer" style="margin-top: auto;">
+            <div class="sidebar-item-wrapper d-flex align-items-center" style="background-color: #ffffff; border-radius: 5px;">
+                <a href="/logout" class="sidebar-link d-flex align-items-center w-100 justify-content-center" style="text-decoration: none; padding: 10px 15px; background-color: #ffffff; color: #000; border-radius: 5px;">
+                    <i class="lni lni-exit me-3" style="font-size: 1.5rem;"></i>
+                    <span style="font-size: 1.1rem; font-family: 'Poppins', sans-serif;">Logout</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Logout Button -->
-    <div class="sidebar-footer" style="margin-top: auto;">
-        <div class="sidebar-item-wrapper d-flex align-items-center" style="background-color: #ffffff; border-radius: 5px;">
-            <a href="/logout" class="sidebar-link d-flex align-items-center w-100 justify-content-center" style="text-decoration: none; padding: 10px 15px; background-color: #ffffff; color: #000; border-radius: 5px;">
-                <i class="lni lni-exit me-3" style="font-size: 1.5rem;"></i>
-                <span style="font-size: 1.1rem; font-family: 'Poppins', sans-serif;">Logout</span>
-            </a>
-        </div>
-    </div>
+
 </aside>
 
 <!-- Include Google Font Poppins -->
