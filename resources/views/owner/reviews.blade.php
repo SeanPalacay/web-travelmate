@@ -265,13 +265,37 @@
                                             </div>
                                         </td>
                                     </tr>
+
+                                    <!-- Proof & Comment Modal -->
+                                    <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow-lg">
+                                                <div class="modal-header bg-light">
+                                                    <h1 class="modal-title fs-4 fw-bold text-dark" id="proofLabel{{ $review->_id }}">Proof &amp; Comment</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    @if($review->proof)
+                                                        <img class="img-fluid rounded mb-4 shadow-sm"
+                                                             src="https://travelmate-be.onrender.com/{{ $review->proof }}"
+                                                             alt="Proof"
+                                                             onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
+                                                    @else
+                                                        <p class="text-muted mb-0">No proof image available</p>
+                                                    @endif
+                                                    <p class="text-muted mt-3">
+                                                        {{ $review->comment ?? 'No comment available' }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @empty
                                     <tr>
                                         <td colspan="9" class="text-center">No data yet</td>
                                     </tr>
                                 @endforelse
                             </tbody>
-                            
                         </table>
                     </div>
 
