@@ -43,6 +43,29 @@
         .table-striped tbody tr:nth-of-type(odd) {
             background-color: #f9f9f9;
         }
+                /* Status Badges */
+                .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .badge.bg-success {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .badge.bg-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
 
         /* Pagination Styles */
         .pagination {
@@ -199,6 +222,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    
                     @forelse ($reviews as $review)
                         <tr>
                             <td>
@@ -245,7 +269,7 @@
                                     <div class="modal-body">
                                         @if($review->proof)
                                             <img class="img-fluid rounded mb-4 shadow-sm"
-                                                 src="https://travelmate-be.onrender.com/{{ $review->proof }}"
+                                                 src="https://newexpresstravelmate.onrender.com/{{ $review->proof }}"
                                                  alt="Proof"
                                                  onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
                                         @else

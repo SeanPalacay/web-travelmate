@@ -46,9 +46,11 @@
 
         /* Status Badges */
         .badge {
-            padding: 0.5em 0.75em;
-            border-radius: 0.25em;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: capitalize;
         }
 
         .badge.bg-success {
@@ -66,7 +68,7 @@
             color: #000;
         }
 
-        /* Pagination Styles */
+               /* Pagination Styles */
         .pagination {
             display: flex;
             justify-content: center;
@@ -341,7 +343,7 @@
                                                 <div class="modal-body">
                                                     @if($report->review->proof)
                                                         <img class="img-fluid rounded mb-4 shadow-sm" 
-                                                            src="https://travelmate-be.onrender.com/{{ $report->review->proof }}" 
+                                                            src="https://newexpresstravelmate.onrender.com/{{ $report->review->proof }}" 
                                                             alt="Proof"
                                                             onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
                                                     @else

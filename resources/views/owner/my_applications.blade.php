@@ -120,6 +120,27 @@
             color: #0D6EFD; /* Matches the thead background color */
         }
 
+                        /* Status Badges */
+                        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+
+
+        .badge.bg-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .table thead {
@@ -153,6 +174,7 @@
             .table-responsive {
                 border: none;
             }
+            
         }
     </style>
 </head>
@@ -253,7 +275,19 @@
                                         </td>
                                         <td data-label="Address">{{ $application->destination_address }}</td>
                                         <td data-label="Locality">{{ $application->locality }}</td>
-                                        <td data-label="Status">{{ $application->status }}</td>
+                       
+
+                                        <td>
+
+                                @if($application->status === 'pending')
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                @elseif($application->status === 'declined')
+                                    <span class="badge bg-danger">Rejected</span>
+                                    @else
+                                    <span class="badge bg-secondary">Unknown</span>
+                                @endif
+                            </td>
+
                                         <td data-label="Actions">
                                             <i class="lni lni-more" id="dropdownMenuButton" type="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
                                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">

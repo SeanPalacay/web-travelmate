@@ -63,7 +63,7 @@
             color: #fff;
         }
 
-        .status-badge.rejected {
+        .status-badge.declined {
             background-color: #dc3545;
             color: #fff;
         }
@@ -256,63 +256,128 @@
                                         <td>
                                             <i class="lni lni-more" data-bs-toggle="dropdown" aria-expanded="false"></i>
                                             <div class="dropdown-menu dropdown-menu-right">
-                                                <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
-                                                <form action="/admin/reviews/delete/{{ $review->id }}" method="POST" style="display: inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="dropdown-item">Delete</button>
-                                                </form>
+                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#proofModal{{ $review->_id }}">View</a>
+                                                <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportModal{{ $review->_id }}">Report</a>
                                             </div>
                                         </td>
                                     </tr>
 
-                                    <!-- Proof & Comment Modal -->
+                                    <!-- Modal for Proof & Comment (Unique per Review) -->
                                     <div class="modal fade" id="proofModal{{ $review->_id }}" tabindex="-1" aria-labelledby="proofLabel{{ $review->_id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content border-0 shadow-lg">
                                                 <div class="modal-header bg-light">
-                                                    <h1 class="modal-title fs-4 fw-bold text-dark" id="proofLabel{{ $review->_id }}">Proof &amp; Comment</h1>
+                                                    <h1 class="modal-title fs-4 fw-bold text-dark" id="proofLabel{{ $review->_id }}">Proof & Comment</h1>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
                                                     @if($review->proof)
-                                                        <img class="img-fluid rounded mb-4 shadow-sm"
-                                                             src="https://travelmate-be.onrender.com/{{ $review->proof }}"
+                                                        <img class="img-fluid rounded mb-4 shadow-sm" 
+                                                             src="https://newexpresstravelmate.onrender.com/{{ $review->proof }}" 
                                                              alt="Proof"
                                                              onerror="this.src='{{ asset('assets/placeholder.jpg') }}'; this.onerror=null;">
                                                     @else
-                                                        <p class="text-muted mb-0">No proof image available</p>
+                                                        <p class="text-muted">No proof image available</p>
                                                     @endif
-                                                    <p class="text-muted mt-3">
-                                                        {{ $review->comment ?? 'No comment available' }}
-                                                    </p>
+                                                    <p class="text-muted mt-3">{{ $review->comment ?? 'No comment available' }}</p>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Report Modal (Unique per Review) -->
+                                    <div class="modal fade" id="reportModal{{ $review->_id }}" tabindex="-1" aria-labelledby="reportLabel{{ $review->_id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow-lg">
+                                                <div class="modal-header bg-light">
+                                                    <h1 class="modal-title fs-4 fw-bold text-dark" id="reportLabel{{ $review->_id }}">Report Review</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form id="reportForm-{{ $review->_id }}" action="/owner/reports/store" method="POST">
+                                                    @csrf
+                                                    <div class="modal-body">
+                                                        @if ($errors->any())
+                                                            <div class="alert alert-danger">
+                                                                <ul class="mb-0">
+                                                                    @foreach ($errors->all() as $error)
+                                                                        <li>{{ $error }}</li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
+                                                        @endif
+                                                        <input type="hidden" value="{{ $review->id }}" name="review_id" id="review_id">
+                                                        <input type="hidden" value="{{ $review->destination_id }}" name="destination_id" id="destination_id">
+                                                        <input type="hidden" name="reason" id="reasonHidden-{{ $review->_id }}">
+
+                                                        @php
+                                                            // Updated: add 'others' as a separate radio option
+                                                            $reportOptions = [
+                                                                ['name' => 'radio_temp', 'value' => 'False information', 'label' => 'False information'],
+                                                                ['name' => 'radio_temp', 'value' => 'Offensive language', 'label' => 'Offensive language'],
+                                                                ['name' => 'radio_temp', 'value' => 'Spam', 'label' => 'Spam'],
+                                                                ['name' => 'radio_temp', 'value' => 'Conflict of interest', 'label' => 'Conflict of interest'],
+                                                                ['name' => 'radio_temp', 'value' => 'Privacy violation', 'label' => 'Privacy violation'],
+                                                                ['name' => 'radio_temp', 'value' => 'Irrelevant content', 'label' => 'Irrelevant content'],
+                                                                ['name' => 'radio_temp', 'value' => 'Threats', 'label' => 'Threats'],
+                                                                ['name' => 'radio_temp', 'value' => 'others', 'label' => 'Others (please specify)'],
+                                                            ];
+                                                        @endphp
+
+@foreach($reportOptions as $option)
+    <div class="form-check mb-2">
+        <input class="form-check-input"
+               type="radio"
+               name="radio_temp"
+               id="report_{{ $option['value'] }}_{{ $review->_id }}"
+               value="{{ $option['value'] }}">
+        <label class="form-check-label" for="report_{{ $option['value'] }}_{{ $review->_id }}">
+            {{ $option['label'] }}
+        </label>
+    </div>
+@endforeach
+
+<label for="others-{{ $review->_id }}" class="mt-3 fw-bold">Explain:</label>
+<textarea class="form-control mt-1"
+          name="others"
+          id="others-{{ $review->_id }}"
+          placeholder="Specify your reason here..."
+          rows="3"></textarea>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-primary w-100 fw-bold" type="submit">Submit Report</button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="text-center">No data yet</td>
+                                        <td colspan="8" class="text-center">No data yet</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Pagination -->
+                    <!-- Pagination Links -->
                     <div class="d-flex justify-content-center mt-4">
                         <nav aria-label="Page navigation">
                             <ul class="pagination">
+                                <!-- Previous Button -->
                                 <li class="page-item {{ $reviews->onFirstPage() ? 'disabled' : '' }}">
                                     <a class="page-link" href="{{ $reviews->appends(request()->query())->previousPageUrl() }}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo; Previous</span>
                                     </a>
                                 </li>
+
+                                <!-- Page Numbers -->
                                 @for ($i = 1; $i <= $reviews->lastPage(); $i++)
                                     <li class="page-item {{ $reviews->currentPage() == $i ? 'active' : '' }}">
                                         <a class="page-link" href="{{ $reviews->appends(request()->query())->url($i) }}">{{ $i }}</a>
                                     </li>
                                 @endfor
+
+                                <!-- Next Button -->
                                 <li class="page-item {{ $reviews->hasMorePages() ? '' : 'disabled' }}">
                                     <a class="page-link" href="{{ $reviews->appends(request()->query())->nextPageUrl() }}" aria-label="Next">
                                         <span aria-hidden="true">Next &raquo;</span>
@@ -330,6 +395,97 @@
             </div>
         </div>
     </div>
+
+    <!-- JavaScript logic -->
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    @foreach($reviews as $review)
+    (function() {
+        const form = document.getElementById('reportForm-{{ $review->_id }}');
+        const reasonHidden = document.getElementById('reasonHidden-{{ $review->_id }}');
+        const radioButtons = form.querySelectorAll('input[name="radio_temp"]');
+        const othersField = document.getElementById('others-{{ $review->_id }}');
+        const othersRadio = document.getElementById('report_others_{{ $review->_id }}');
+        const reportModal = document.getElementById('reportModal{{ $review->_id }}');
+
+        // Listen for input in the textarea
+        othersField.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                othersRadio.checked = true; // Automatically select "Others" if text is entered
+            }
+        });
+
+        // On form submit, set the hidden "reason" input
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            // Find which radio is checked
+            let selectedRadio = Array.from(radioButtons).find(r => r.checked);
+
+            if (selectedRadio) {
+                // If "others," reason = the text area
+                if (selectedRadio.value === 'others') {
+                    reasonHidden.value = othersField.value.trim();
+                } else {
+                    // Otherwise, reason = radio's value
+                    reasonHidden.value = selectedRadio.value;
+                }
+            } else {
+                // If no radio is selected, see if user typed in the text area
+                let othersText = othersField.value.trim();
+                if (othersText.length > 0) {
+                    reasonHidden.value = othersText;
+                }
+                // Else let server handle validation
+            }
+
+            // Submit the form via AJAX
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}', // Add CSRF token
+                    'Accept': 'application/json', // Ensure the response is JSON
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message || 'Report submitted successfully.',
+                        confirmButtonText: 'OK',
+                    }).then(() => {
+                        // Close the modal after success
+                        const modal = bootstrap.Modal.getInstance(reportModal);
+                        modal.hide();
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.message || 'Failed to submit report. Please try again.',
+                        confirmButtonText: 'OK',
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'An error occurred while submitting the report. Please try again.',
+                    confirmButtonText: 'OK',
+                });
+            });
+        });
+    })();
+    @endforeach
+});
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
